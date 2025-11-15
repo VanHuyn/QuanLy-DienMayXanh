@@ -1,0 +1,710 @@
+// AnhSanPham.js
+// Model Sequelize cho bảng AnhSanPham
+// Ảnh sản phẩm
+
+module.exports = (sequelize, DataTypes) => {
+  const AnhSanPham = sequelize.define('AnhSanPham', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    Url: { type: DataTypes.STRING(1000), allowNull: false },
+    LaChinh: { type: DataTypes.BOOLEAN, defaultValue: false },
+  }, { tableName: 'AnhSanPham', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.SanPham) AnhSanPham.belongsTo(models.SanPham, { foreignKey: 'SanPhamId', as: 'SanPham' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return AnhSanPham;
+};// BienTheSanPham.js
+module.exports = (sequelize, DataTypes) => {
+  const BienTheSanPham = sequelize.define('BienTheSanPham', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    Ten: { type: DataTypes.STRING(200), allowNull: true },
+    Gia: { type: DataTypes.DECIMAL(15,2), allowNull: true },
+    SoLuongTon: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 0 },
+  }, { tableName: 'BienTheSanPham', timestamps: true });
+
+  BienTheSanPham.associate = models => {
+    BienTheSanPham.belongsTo(models.SanPham, { foreignKey: 'SanPhamId', as: 'SanPham' });
+    BienTheSanPham.hasMany(models.ChiTietDonHang, { foreignKey: 'BienTheSanPhamId', as: 'ChiTietDonHangs' });
+    BienTheSanPham.hasMany(models.ChiTietGioHang, { foreignKey: 'BienTheSanPhamId', as: 'ChiTietGioHangs' });
+    BienTheSanPham.hasMany(models.TonKho, { foreignKey: 'BienTheSanPhamId', as: 'TonKhos' });
+    BienTheSanPham.hasMany(models.ChiTietPhieuNhapXuatKho, { foreignKey: 'BienTheSanPhamId', as: 'ChiTietPhieuNXKs' });
+    BienTheSanPham.belongsToMany(models.KhuyenMai, { through: models.KhuyenMaiBienTheSanPham, foreignKey: 'BienTheSanPhamId', as: 'KhuyenMais' });
+  };
+
+  return BienTheSanPham;
+};
+// ChiNhanh.js
+// Model Sequelize cho bảng ChiNhanh
+// Thông tin các chi nhánh
+
+module.exports = (sequelize, DataTypes) => {
+  const ChiNhanh = sequelize.define('ChiNhanh', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(255), allowNull: false },
+    Ma: { type: DataTypes.STRING(50), allowNull: true, unique: true },
+    DiaChi: { type: DataTypes.STRING(500), allowNull: true },
+    SoDienThoai: { type: DataTypes.STRING(50), allowNull: true },
+    Email: { type: DataTypes.STRING(200), allowNull: true },
+  }, { tableName: 'ChiNhanh', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.NhanVien) ChiNhanh.hasMany(models.NhanVien, { foreignKey: 'ChiNhanhId', as: 'NhanViens' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return ChiNhanh;
+};// ChiTietDonHang.js
+// Model Sequelize cho bảng ChiTietDonHang
+// Chi tiết đơn hàng
+
+module.exports = (sequelize, DataTypes) => {
+  const ChiTietDonHang = sequelize.define(
+    "ChiTietDonHang",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      DonHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      SoLuong: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 1 },
+      DonGia: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
+    },
+    { tableName: "ChiTietDonHang", timestamps: true }
+  );
+
+  ChiTietDonHang.associate = (models) => {
+    ChiTietDonHang.belongsTo(models.DonHang, {
+      foreignKey: "DonHangId",
+      as: "DonHang",
+    });
+    ChiTietDonHang.belongsTo(models.BienTheSanPham, {
+      foreignKey: "BienTheSanPhamId",
+      as: "BienTheSanPham",
+    });
+    ChiTietDonHang.belongsTo(models.SanPham, {
+      foreignKey: "SanPhamId",
+      as: "SanPham",
+    }); // trực tiếp
+  };
+
+  return ChiTietDonHang;
+};// ChiTietGioHang.js
+// Model Sequelize cho bảng ChiTietGioHang
+// Chi tiết giỏ hàng
+
+module.exports = (sequelize, DataTypes) => {
+  const ChiTietGioHang = sequelize.define(
+    "ChiTietGioHang",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      GioHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      SoLuong: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 1 },
+    },
+    { tableName: "ChiTietGioHang", timestamps: true }
+  );
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  ChiTietGioHang.associate = (models) => {
+    ChiTietGioHang.belongsTo(models.GioHang, {
+      foreignKey: "GioHangId",
+      as: "GioHang",
+    });
+    ChiTietGioHang.belongsTo(models.BienTheSanPham, {
+      foreignKey: "BienTheSanPhamId",
+      as: "BienTheSanPham",
+    });
+  };
+
+  return ChiTietGioHang;
+};
+// ChiTietPhieuNhapXuatKho.js
+module.exports = (sequelize, DataTypes) => {
+  const ChiTietPhieuNhapXuatKho = sequelize.define(
+    "ChiTietPhieuNhapXuatKho",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      PhieuNhapXuatKhoId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      SoLuong: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 0 },
+    },
+    { tableName: "ChiTietPhieuNhapXuatKho", timestamps: true }
+  );
+
+  ChiTietPhieuNhapXuatKho.associate = (models) => {
+    ChiTietPhieuNhapXuatKho.belongsTo(models.PhieuNhapXuatKho, {
+      foreignKey: "PhieuNhapXuatKhoId",
+      as: "PhieuNhapXuatKho",
+    });
+    ChiTietPhieuNhapXuatKho.belongsTo(models.BienTheSanPham, {
+      foreignKey: "BienTheSanPhamId",
+      as: "BienTheSanPham",
+    });
+  };
+
+  return ChiTietPhieuNhapXuatKho;
+};
+
+// DanhGiaSanPham.js
+// Model Sequelize cho bảng DanhGiaSanPham
+// Đánh giá sản phẩm
+
+module.exports = (sequelize, DataTypes) => {
+  const DanhGiaSanPham = sequelize.define('DanhGiaSanPham', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    SoSao: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    NoiDung: { type: DataTypes.TEXT, allowNull: true },
+    Ngay: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  }, { tableName: 'DanhGiaSanPham', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.SanPham) DanhGiaSanPham.belongsTo(models.SanPham, { foreignKey: 'SanPhamId', as: 'SanPham' });
+    if (models.KhachHang) DanhGiaSanPham.belongsTo(models.KhachHang, { foreignKey: 'KhachHangId', as: 'KhachHang' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return DanhGiaSanPham;
+};
+
+// DanhMuc.js
+// Model Sequelize cho bảng DanhMuc
+// Danh mục sản phẩm
+
+module.exports = (sequelize, DataTypes) => {
+  const DanhMuc = sequelize.define('DanhMuc', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(200), allowNull: false },
+    MoTa: { type: DataTypes.TEXT, allowNull: true },
+  }, { tableName: 'DanhMuc', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.SanPham) DanhMuc.hasMany(models.SanPham, { foreignKey: 'DanhMucId', as: 'SanPhams' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return DanhMuc;
+};
+// DonHang.js
+// Model Sequelize cho bảng DonHang
+// Đơn hàng
+
+module.exports = (sequelize, DataTypes) => {
+  const DonHang = sequelize.define(
+    "DonHang",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      Ma: { type: DataTypes.STRING(100), allowNull: true, unique: true },
+      KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      ChiNhanhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      NhanVienId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      DiaChiGiao: { type: DataTypes.STRING(500), allowNull: true },
+      TongTien: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
+      PhiVanChuyen: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
+      PhuongThucThanhToan: { type: DataTypes.STRING(100), allowNull: true },
+      TrangThai: {
+        type: DataTypes.ENUM("ChoXacNhan", "DangGiao", "DaHoanTat", "DaHuy"),
+        defaultValue: "ChoXacNhan",
+      },
+      NgayDat: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    },
+    { tableName: "DonHang", timestamps: true }
+  );
+
+  DonHang.associate = (models) => {
+    DonHang.belongsTo(models.KhachHang, {
+      foreignKey: "KhachHangId",
+      as: "KhachHang",
+    });
+    DonHang.belongsTo(models.ChiNhanh, {
+      foreignKey: "ChiNhanhId",
+      as: "ChiNhanh",
+    });
+    DonHang.belongsTo(models.NhanVien, {
+      foreignKey: "NhanVienId",
+      as: "NguoiXuLy",
+    });
+    DonHang.hasMany(models.ChiTietDonHang, {
+      foreignKey: "DonHangId",
+      as: "ChiTietDonHangs",
+    });
+    DonHang.hasMany(models.PhieuBaoHanh, {
+      foreignKey: "DonHangId",
+      as: "PhieuBaoHanhs",
+    });
+    DonHang.hasMany(models.PhieuDoiTra, {
+      foreignKey: "DonHangId",
+      as: "PhieuDoiTras",
+    });
+    DonHang.hasMany(models.PhieuThanhToan, {
+      foreignKey: "DonHangId",
+      as: "PhieuThanhToans",
+    });
+    DonHang.belongsToMany(models.BienTheSanPham, {
+      through: models.ChiTietDonHang,
+      foreignKey: "DonHangId",
+      as: "BienTheSanPhams",
+    });
+  };
+
+  return DonHang;
+};
+// DonViTinh.js
+// Model Sequelize cho bảng DonViTinh
+// Đơn vị tính
+
+module.exports = (sequelize, DataTypes) => {
+  const DonViTinh = sequelize.define('DonViTinh', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(50), allowNull: false },
+  }, { tableName: 'DonViTinh', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.SanPham) DonViTinh.hasMany(models.SanPham, { foreignKey: 'DonViTinhId', as: 'SanPhams' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return DonViTinh;
+};
+// GioHang.js
+// Model Sequelize cho bảng GioHang
+// Giỏ hàng tạm cho khách
+
+module.exports = (sequelize, DataTypes) => {
+  const GioHang = sequelize.define(
+    "GioHang",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      NgayTao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    },
+    { tableName: "GioHang", timestamps: true }
+  );
+
+  GioHang.associate = (models) => {
+    GioHang.belongsTo(models.KhachHang, {
+      foreignKey: "KhachHangId",
+      as: "KhachHang",
+    });
+    GioHang.hasMany(models.ChiTietGioHang, {
+      foreignKey: "GioHangId",
+      as: "ChiTietGioHangs",
+    });
+    GioHang.belongsToMany(models.BienTheSanPham, {
+      through: models.ChiTietGioHang,
+      foreignKey: "GioHangId",
+      as: "BienTheSanPhams",
+    });
+  };
+  return GioHang;
+};
+// KhachHang.js
+// Model Sequelize cho bảng KhachHang
+// Thông tin khách hàng mở rộng
+
+module.exports = (sequelize, DataTypes) => {
+  const KhachHang = sequelize.define('KhachHang', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    NguoiDungId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false, comment: 'FK -> NguoiDung' },
+    NgayDangKy: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    DiemTichLuy: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 0 },
+  }, { tableName: 'KhachHang', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.NguoiDung) KhachHang.belongsTo(models.NguoiDung, { foreignKey: 'NguoiDungId', as: 'NguoiDung' });
+    if (models.GioHang) KhachHang.hasOne(models.GioHang, { foreignKey: 'KhachHangId', as: 'GioHang' });
+    if (models.DonHang) KhachHang.hasMany(models.DonHang, { foreignKey: 'KhachHangId', as: 'DonHangs' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return KhachHang;
+};
+// KhoChiNhanh.js
+// Model Sequelize cho bảng KhoChiNhanh
+// Kho nội bộ tại chi nhánh
+
+module.exports = (sequelize, DataTypes) => {
+  const KhoChiNhanh = sequelize.define('KhoChiNhanh', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    ChiNhanhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    Ten: { type: DataTypes.STRING(255), allowNull: true },
+    DiaChi: { type: DataTypes.STRING(500), allowNull: true },
+  }, { tableName: 'KhoChiNhanh', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.ChiNhanh) KhoChiNhanh.belongsTo(models.ChiNhanh, { foreignKey: 'ChiNhanhId', as: 'ChiNhanh' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return KhoChiNhanh;
+};
+// KhoTong.js
+// Model Sequelize cho bảng KhoTong
+// Kho trung tâm
+
+module.exports = (sequelize, DataTypes) => {
+  const KhoTong = sequelize.define('KhoTong', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(255), allowNull: true },
+    DiaChi: { type: DataTypes.STRING(500), allowNull: true },
+  }, { tableName: 'KhoTong', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.PhieuNhapXuatKho) KhoTong.hasMany(models.PhieuNhapXuatKho, { foreignKey: 'NoiGui', sourceKey: 'Id', as: 'PhieuNhapXuats' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return KhoTong;
+};
+// KhuyenMai.js
+// Model Sequelize cho bảng KhuyenMai
+// Chương trình khuyến mãi
+
+module.exports = (sequelize, DataTypes) => {
+  const KhuyenMai = sequelize.define('KhuyenMai', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ma: { type: DataTypes.STRING(100), allowNull: true, unique: true },
+    Ten: { type: DataTypes.STRING(255), allowNull: false },
+    PhanTramGiam: { type: DataTypes.FLOAT, allowNull: true },
+    NgayBatDau: { type: DataTypes.DATE, allowNull: true },
+    NgayKetThuc: { type: DataTypes.DATE, allowNull: true },
+    ApDungChoTatCa: { type: DataTypes.BOOLEAN, defaultValue:  false },
+  }, { tableName: 'KhuyenMai', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return KhuyenMai;
+};
+// KhuyenMaiBienTheSanPham.js
+module.exports = (sequelize, DataTypes) => {
+  const KhuyenMaiBienTheSanPham = sequelize.define('KhuyenMaiBienTheSanPham', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    KhuyenMaiId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+  }, { tableName: 'KhuyenMaiBienTheSanPham', timestamps: true });
+
+  KhuyenMaiBienTheSanPham.associate = models => {
+    KhuyenMaiBienTheSanPham.belongsTo(models.KhuyenMai, { foreignKey: 'KhuyenMaiId', as: 'KhuyenMai' });
+    KhuyenMaiBienTheSanPham.belongsTo(models.BienTheSanPham, { foreignKey: 'BienTheSanPhamId', as: 'BienTheSanPham' });
+  };
+
+  return KhuyenMaiBienTheSanPham;
+};
+// NguoiDung.js
+// Model Sequelize cho bảng NguoiDung
+// Tài khoản người dùng chung (Admin, Nhân viên, Khách hàng)
+
+module.exports = (sequelize, DataTypes) => {
+  const NguoiDung = sequelize.define('NguoiDung', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    HoTen: { type: DataTypes.STRING(200), allowNull: false, comment: 'Họ và tên' },
+    Email: { type: DataTypes.STRING(200), allowNull: false, unique: true, comment: 'Email đăng nhập' },
+    MatKhau: { type: DataTypes.STRING(255), allowNull: true, comment: 'Mật khẩu băm' },
+    SoDienThoai: { type: DataTypes.STRING(50), allowNull: true },
+    DiaChi: { type: DataTypes.STRING(500), allowNull: true },
+    VaiTroId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false, comment: 'FK -> VaiTro' },
+    TrangThai: { type: DataTypes.ENUM('Active','Inactive','Locked'), defaultValue: 'Active' },
+  }, { tableName: 'NguoiDung', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.KhachHang) NguoiDung.hasOne(models.KhachHang, { foreignKey: 'NguoiDungId', as: 'KhachHang' });
+    if (models.NhanVien) NguoiDung.hasOne(models.NhanVien, { foreignKey: 'NguoiDungId', as: 'NhanVien' });
+    if (models.VaiTro) NguoiDung.belongsTo(models.VaiTro, { foreignKey: 'VaiTroId', as: 'VaiTro' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return NguoiDung;
+};
+
+// NhaCungCap.js
+// Model Sequelize cho bảng NhaCungCap
+// Nhà cung cấp
+
+module.exports = (sequelize, DataTypes) => {
+  const NhaCungCap = sequelize.define('NhaCungCap', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(255), allowNull: false },
+    DiaChi: { type: DataTypes.STRING(500), allowNull: true },
+    SoDienThoai: { type: DataTypes.STRING(50), allowNull: true },
+    Email: { type: DataTypes.STRING(200), allowNull: true },
+  }, { tableName: 'NhaCungCap', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.PhieuNhapNCC) NhaCungCap.hasMany(models.PhieuNhapNCC, { foreignKey: 'NhaCungCapId', as: 'PhieuNhapNCCs' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return NhaCungCap;
+};
+// NhanVien.js
+// Thông tin chi tiết của nhân viên (liên kết với NguoiDung và ChiNhanh)
+
+module.exports = (sequelize, DataTypes) => {
+  const NhanVien = sequelize.define('NhanVien', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    NguoiDungId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false, comment: 'FK -> NguoiDung' },
+    ChiNhanhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true, comment: 'FK -> ChiNhanh' },
+    MaNhanVien: { type: DataTypes.STRING(50), allowNull: true, unique: true, comment: 'Mã nhân viên' },
+    ChucVu: {
+      type: DataTypes.ENUM(
+        'QuanLy',
+        'NhanVienBanHang',
+        'NhanVienKhoTong',
+        'NhanVienKhoChiNhanh'
+      ),
+      allowNull: true,
+      comment: 'Chức vụ cụ thể trong hệ thống'
+    },
+    NgayTuyenDung: { type: DataTypes.DATE, allowNull: true, comment: 'Ngày tuyển dụng' },
+  }, { tableName: 'NhanVien', timestamps: true });
+
+  // Quan hệ
+  const models = sequelize.models;
+  try {
+    if (models.NguoiDung)
+      NhanVien.belongsTo(models.NguoiDung, { foreignKey: 'NguoiDungId', as: 'NguoiDung' });
+
+    if (models.ChiNhanh)
+      NhanVien.belongsTo(models.ChiNhanh, { foreignKey: 'ChiNhanhId', as: 'ChiNhanh' });
+  } catch (e) {}
+
+  return NhanVien;
+};
+
+// PhieuBaoHanh.js
+// Model Sequelize cho bảng PhieuBaoHanh
+// Phiếu bảo hành / yêu cầu sửa chữa
+
+module.exports = (sequelize, DataTypes) => {
+  const PhieuBaoHanh = sequelize.define('PhieuBaoHanh', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    DonHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    NgayGui: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    TrangThai: { type: DataTypes.ENUM('Moi','DangXuLy','DaHoanThanh'), defaultValue: 'Moi' },
+  }, { tableName: 'PhieuBaoHanh', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.DonHang) PhieuBaoHanh.belongsTo(models.DonHang, { foreignKey: 'DonHangId', as: 'DonHang' });
+    if (models.KhachHang) PhieuBaoHanh.belongsTo(models.KhachHang, { foreignKey: 'KhachHangId', as: 'KhachHang' });
+    if (models.SanPham) PhieuBaoHanh.belongsTo(models.SanPham, { foreignKey: 'SanPhamId', as: 'SanPham' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return PhieuBaoHanh;
+};
+// PhieuDoiTra.js
+// Model Sequelize cho bảng PhieuDoiTra
+// Phiếu đổi / trả hàng
+
+module.exports = (sequelize, DataTypes) => {
+  const PhieuDoiTra = sequelize.define('PhieuDoiTra', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    DonHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    LyDo: { type: DataTypes.STRING(500), allowNull: true },
+    Ngay: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    TrangThai: { type: DataTypes.ENUM('ChoXuLy','DaXuLy','TuChoi'), defaultValue: 'ChoXuLy' },
+  }, { tableName: 'PhieuDoiTra', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.DonHang) PhieuDoiTra.belongsTo(models.DonHang, { foreignKey: 'DonHangId', as: 'DonHang' });
+    if (models.KhachHang) PhieuDoiTra.belongsTo(models.KhachHang, { foreignKey: 'KhachHangId', as: 'KhachHang' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return PhieuDoiTra;
+};
+// PhieuNhapNCC.js
+// Model Sequelize cho bảng PhieuNhapNCC
+// Đơn nhập hàng từ nhà cung cấp vào kho tổng
+
+module.exports = (sequelize, DataTypes) => {
+  const PhieuNhapNCC = sequelize.define('PhieuNhapNCC', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    NhaCungCapId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    NgayDat: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    TongTien: { type: DataTypes.DECIMAL(15,2), defaultValue: 0 },
+    TrangThai: { type: DataTypes.ENUM('ChoNhap','DaNhap','Huy'), defaultValue: 'ChoNhap' },
+  }, { tableName: 'PhieuNhapNCC', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.NhaCungCap) PhieuNhapNCC.belongsTo(models.NhaCungCap, { foreignKey: 'NhaCungCapId', as: 'NhaCungCap' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return PhieuNhapNCC;
+};
+// PhieuNhapXuatKho.js
+// Model Sequelize cho bảng PhieuNhapXuatKho
+// Phiếu nhập / xuất giữa KhoTong và KhoChiNhanh
+
+module.exports = (sequelize, DataTypes) => {
+  const PhieuNhapXuatKho = sequelize.define(
+    "PhieuNhapXuatKho",
+    {
+      Id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      Loai: {
+        type: DataTypes.ENUM("Nhap", "Xuat", "DieuChuyen"),
+        allowNull: false,
+      },
+      NoiGui: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: "ví dụ: KhoTong:1 hoặc ChiNhanh:2",
+      },
+      NoiNhan: { type: DataTypes.STRING(100), allowNull: true },
+      NhanVienId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      Ngay: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+      GhiChu: { type: DataTypes.TEXT, allowNull: true },
+    },
+    { tableName: "PhieuNhapXuatKho", timestamps: true }
+  );
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  PhieuNhapXuatKho.associate = (models) => {
+    PhieuNhapXuatKho.belongsTo(models.NhanVien, {
+      foreignKey: "NhanVienId",
+      as: "NguoiThucHien",
+    });
+    PhieuNhapXuatKho.belongsTo(models.KhoTong, {
+      foreignKey: "KhoTongId",
+      as: "KhoTong",
+    });
+    PhieuNhapXuatKho.belongsTo(models.KhoChiNhanh, {
+      foreignKey: "KhoChiNhanhId",
+      as: "KhoChiNhanh",
+    });
+    PhieuNhapXuatKho.hasMany(models.ChiTietPhieuNhapXuatKho, {
+      foreignKey: "PhieuNhapXuatKhoId",
+      as: "ChiTietPhieuNXKs",
+    });
+  };
+
+  return PhieuNhapXuatKho;
+};
+
+// PhieuThanhToan.js
+// Model Sequelize cho bảng PhieuThanhToan
+// Ghi nhận thanh toán
+
+module.exports = (sequelize, DataTypes) => {
+  const PhieuThanhToan = sequelize.define('PhieuThanhToan', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    DonHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+    SoTien: { type: DataTypes.DECIMAL(15,2), defaultValue: 0 },
+    PhuongThuc: { type: DataTypes.STRING(100), allowNull: true },
+    NgayThanhToan: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    TrangThai: { type: DataTypes.ENUM('ThanhCong','ThatBai','DangCho'), defaultValue: 'DangCho' },
+  }, { tableName: 'PhieuThanhToan', timestamps: true });
+
+  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
+  const models = sequelize.models;
+  try {
+    if (models.DonHang) PhieuThanhToan.belongsTo(models.DonHang, { foreignKey: 'DonHangId', as: 'DonHang' });
+  } catch (e) {
+    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
+  }
+
+  return PhieuThanhToan;
+};
+
+// SanPham.js
+module.exports = (sequelize, DataTypes) => {
+  const SanPham = sequelize.define('SanPham', {
+    Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+    Ten: { type: DataTypes.STRING(300), allowNull: false },
+    SKU: { type: DataTypes.STRING(100), allowNull: true, unique: true },
+    MoTa: { type: DataTypes.TEXT, allowNull: true },
+    Gia: { type: DataTypes.DECIMAL(15,2), allowNull: false, defaultValue: 0 },
+    DanhMucId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    DonViTinhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    TrangThai: { type: DataTypes.ENUM('DangBan','TamNgung','HetHang'), defaultValue: 'DangBan' },
+  }, { tableName: 'SanPham', timestamps: true });
+
+  SanPham.associate = models => {
+    SanPham.belongsTo(models.DanhMuc, { foreignKey: 'DanhMucId', as: 'DanhMuc' });
+    SanPham.belongsTo(models.DonViTinh, { foreignKey: 'DonViTinhId', as: 'DonViTinh' });
+    SanPham.hasMany(models.BienTheSanPham, { foreignKey: 'SanPhamId', as: 'BienTheSanPhams' });
+    SanPham.hasMany(models.AnhSanPham, { foreignKey: 'SanPhamId', as: 'AnhSanPhams' });
+    SanPham.hasMany(models.DanhGiaSanPham, { foreignKey: 'SanPhamId', as: 'DanhGias' });
+    SanPham.hasMany(models.PhieuBaoHanh, { foreignKey: 'SanPhamId', as: 'PhieuBaoHanhs' });
+    SanPham.hasMany(models.ChiTietDonHang, { foreignKey: 'SanPhamId', as: 'ChiTietDonHangs' });
+  };
+
+  return SanPham;
+};
+
+
