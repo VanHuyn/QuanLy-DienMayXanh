@@ -1,7 +1,3 @@
-// ChiTietDonHang.js
-// Model Sequelize cho bảng ChiTietDonHang
-// Chi tiết đơn hàng
-
 module.exports = (sequelize, DataTypes) => {
   const ChiTietDonHang = sequelize.define(
     "ChiTietDonHang",
@@ -12,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
       },
       DonHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
-      BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
+      BienTheSanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false }, // FIXED
       SoLuong: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 1 },
       DonGia: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
     },
@@ -24,14 +21,16 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "DonHangId",
       as: "DonHang",
     });
+
     ChiTietDonHang.belongsTo(models.BienTheSanPham, {
       foreignKey: "BienTheSanPhamId",
       as: "BienTheSanPham",
     });
+
     ChiTietDonHang.belongsTo(models.SanPham, {
       foreignKey: "SanPhamId",
       as: "SanPham",
-    }); // trực tiếp
+    });
   };
 
   return ChiTietDonHang;
