@@ -1,6 +1,5 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('NguoiDung', {
@@ -12,18 +11,17 @@ module.exports = {
       HoTen: {
         type: Sequelize.STRING(200),
         allowNull: false,
-        comment: 'Họ và tên người dùng',
       },
       Email: {
         type: Sequelize.STRING(200),
         allowNull: false,
         unique: true,
-        comment: 'Email đăng nhập duy nhất',
+        comment: 'Email đăng nhập',
       },
       MatKhau: {
         type: Sequelize.STRING(255),
-        allowNull: true,
-        comment: 'Mật khẩu đã được mã hoá (hash)',
+        allowNull: false, // BẮT BUỘC CÓ MẬT KHẨU
+        comment: 'Mật khẩu đã hash',
       },
       SoDienThoai: {
         type: Sequelize.STRING(50),
@@ -33,23 +31,30 @@ module.exports = {
         type: Sequelize.STRING(500),
         allowNull: true,
       },
+
       VaiTroId: {
         type: Sequelize.BIGINT.UNSIGNED,
         allowNull: false,
-        comment: 'Khoá ngoại liên kết tới bảng VaiTro',
         references: {
           model: 'VaiTro',
           key: 'Id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT', // Không cho xoá vai trò nếu còn người dùng liên quan
+        onDelete: 'RESTRICT',
       },
+
       TrangThai: {
         type: Sequelize.ENUM('Active', 'Inactive', 'Locked'),
         allowNull: false,
         defaultValue: 'Active',
-        comment: 'Trạng thái tài khoản',
       },
+
+      RefreshToken: {
+        type: Sequelize.STRING(500),
+        allowNull: true,
+        comment: 'Lưu JWT refresh token để login không cần nhập lại',
+      },
+
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -58,7 +63,9 @@ module.exports = {
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+        defaultValue: Sequelize.literal(
+          'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+        ),
       },
     });
   },

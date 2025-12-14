@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
+import Meta from "../../components/Meta";
 
 const testCart = [
   {
@@ -40,6 +41,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
+      <Meta title={"Chào mừng bạn đến với giỏ hàng"} description={"Chào mừng bạn đến với giỏ hàng"} />
       <h1 className="text-3xl font-bold mb-8 text-gray-900">Giỏ hàng</h1>
 
       {cart.length === 0 ? (

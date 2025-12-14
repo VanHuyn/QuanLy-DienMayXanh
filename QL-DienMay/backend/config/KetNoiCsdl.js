@@ -1,4 +1,4 @@
-import { Sequelize } from'sequelize';
+const { Sequelize } =require('sequelize');
 
 
 // Option 3: Passing parameters separately (other dialects)
@@ -15,4 +15,4 @@ const KetNoiCsdl = async()=>{
     console.error('Unable to connect to the database:', error);
     }
 }
-export default KetNoiCsdl
+module.exports = KetNoiCsdl;

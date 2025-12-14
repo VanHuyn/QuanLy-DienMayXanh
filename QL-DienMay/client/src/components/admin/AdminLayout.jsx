@@ -2,42 +2,43 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { User, LogOut } from "lucide-react";
 import { menuAdmin } from "../../data/index";
-// import { useAuth } from "../../context/AuthContext";
+import useAuth from "../../hooks/useAuth";
+import { toast } from "react-hot-toast";
 export default function AdminLayout() {
-  // const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    // logout();
-    navigate("/");
+  const handleLogout = async () => {
+    await logout();
+    navigate("/dang-nhap");
   };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 flex justify-between items-center px-6 py-3">
+        {/* Logo */}
         <Link to="/admin/dashboard" className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold text-green-700">HỆ THỐNG</h2>
+          <h2 className="text-2xl font-bold text-blue-700">HỆ THỐNG</h2>
           <span className="text-gray-500 font-medium hidden sm:inline">
             Quản lý Admin
           </span>
         </Link>
 
+        {/* User dropdown */}
         {user && (
           <div className="relative" ref={dropdownRef}>
             <button
@@ -50,7 +51,7 @@ export default function AdminLayout() {
                   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=50"
                 }
                 alt={user.name}
-                className="w-9 h-9 rounded-full border-2 border-green-500 object-cover"
+                className="w-9 h-9 rounded-full border-2 border-blue-700 object-cover"
               />
               <span className="font-semibold text-gray-800">{user.name}</span>
             </button>
@@ -63,9 +64,11 @@ export default function AdminLayout() {
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-2 px-4 py-3 hover:bg-gray-50"
                   >
-                    <User size={18} className="text-green-600" /> Hồ sơ
+                    <User size={18} className="text-blue-700" /> Hồ sơ
                   </Link>
                 </li>
+
+                {/* Logout */}
                 <li
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-3 text-red-500 hover:bg-gray-50 cursor-pointer"
@@ -78,7 +81,7 @@ export default function AdminLayout() {
         )}
       </header>
 
-      {/* Nội dung chính */}
+      {/* Layout */}
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside className="w-60 bg-white border-r border-gray-200 p-4 flex flex-col gap-1">
@@ -101,7 +104,7 @@ export default function AdminLayout() {
           })}
         </aside>
 
-        {/* Outlet */}
+        {/* Nội dung */}
         <main className="flex-1 p-6 bg-gray-50">
           <Outlet />
         </main>

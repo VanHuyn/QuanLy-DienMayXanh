@@ -1,11 +1,15 @@
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import morgan from "morgan";
-import KetNoiCsdl from "./config/KetNoiCsdl.js";
-
-
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+require('dotenv').config();
+const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
+const KetNoiCsdl = require("./config/KetNoiCsdl.js");
+const roleRoute = require("./routers/role.route");
+const userRoute = require("./routers/user.route.js");
+const authRoute = require("./routers/auth.routes.js");
+const categoryRoute = require("./routers/category.router.js");
+const supplierRoute = require("./routers/supplier.router.js");
 const app = express();
 const PORT = 5000;
 
@@ -20,8 +24,11 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 
-
-
+app.use("/api/v1/users", userRoute);
+app.use("/api/v1/roles", roleRoute);
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/supplier", supplierRoute);
 
 // Kết nối database
 KetNoiCsdl();

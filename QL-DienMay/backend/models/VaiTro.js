@@ -1,4 +1,3 @@
-// VaiTro.js
 module.exports = (sequelize, DataTypes) => {
   const VaiTro = sequelize.define('VaiTro', {
     Id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
@@ -13,16 +12,15 @@ module.exports = (sequelize, DataTypes) => {
         'KhachVangLai'
       ),
       allowNull: false,
-      unique: true,
-      comment: 'Tên vai trò trong hệ thống'
+      unique: true
     },
-    MoTa: { type: DataTypes.TEXT, allowNull: true },
+    MoTa: { type: DataTypes.TEXT },
   }, { tableName: 'VaiTro', timestamps: true });
 
-  const models = sequelize.models;
-  try {
-    if (models.NguoiDung) VaiTro.hasMany(models.NguoiDung, { foreignKey: 'VaiTroId', as: 'NguoiDungs' });
-  } catch (e) {}
+  // 🔥 định nghĩa quan hệ chuẩn
+  VaiTro.associate = (models) => {
+    VaiTro.hasMany(models.NguoiDung, { foreignKey: 'VaiTroId', as: 'NguoiDungs' });
+  };
 
   return VaiTro;
 };

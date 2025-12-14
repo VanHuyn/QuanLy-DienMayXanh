@@ -1,8 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Meta from "../../components/Meta";
 import { useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
   const [form, setForm] = useState({
     HoTen: "",
     Email: "",
@@ -12,28 +17,49 @@ export default function Register() {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const validate = () => {
     const newErrors = {};
 
     if (!form.HoTen.trim()) newErrors.HoTen = "Họ và tên là bắt buộc";
     if (!form.Email.trim()) newErrors.Email = "Email là bắt buộc";
+    else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(form.Email))
+      newErrors.Email = "Email không hợp lệ";
+
     if (!form.MatKhau.trim()) newErrors.MatKhau = "Mật khẩu là bắt buộc";
+    else if (form.MatKhau.length < 6)
+      newErrors.MatKhau = "Mật khẩu tối thiểu 6 ký tự";
+
     if (!form.SoDienThoai.trim())
       newErrors.SoDienThoai = "Số điện thoại là bắt buộc";
+    else if (!/^(0|\+84)\d{9}$/g.test(form.SoDienThoai))
+      newErrors.SoDienThoai = "Số điện thoại không hợp lệ";
+
     if (!form.DiaChi.trim()) newErrors.DiaChi = "Địa chỉ là bắt buộc";
 
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = validate();
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Form data:", form);
-      alert("Đăng ký thành công (chỉ demo UI)!");
+    if (Object.keys(newErrors).length > 0) return;
+
+    try {
+      setLoading(true);
+      await register(form);
+
+      toast.success("Đăng ký thành công!");
+      navigate("/dang-nhap");
+
       setForm({
         HoTen: "",
         Email: "",
@@ -41,6 +67,11 @@ export default function Register() {
         SoDienThoai: "",
         DiaChi: "",
       });
+    } catch (err) {
+      const msg = err.response?.data?.message || "Đăng ký thất bại!";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,11 +82,10 @@ export default function Register() {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <Meta
-        title="Đăng ký tài khoản Điện Máy Xanh"
-        description="Đăng ký tài khoản Điện Máy Xanh"
-      />
+      <Meta title="Đăng ký tài khoản Điện Máy Xanh" description="Register" />
+
       <div className="flex flex-col md:flex-row py-10 md:py-20 gap-8 items-center">
+        {/* Ảnh minh họa */}
         <div className="w-full md:w-1/2">
           <img
             src="https://cdn.tgdd.vn/2022/10/banner/TGDD-540x270-1.png"
@@ -63,6 +93,8 @@ export default function Register() {
             className="w-full rounded-xl"
           />
         </div>
+
+        {/* Form */}
         <div className="w-full md:w-1/2">
           <form
             onSubmit={handleSubmit}
@@ -72,29 +104,8 @@ export default function Register() {
               Đăng ký tài khoản
             </h2>
 
+            {/* Họ Tên */}
             <div className={`${inputWrapperClass} ${errors.HoTen ? "border-red-500" : ""}`}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 15 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M7.5 7.5c1.5 0 2.5-1 2.5-2.5S9 2.5 7.5 2.5 5 3.5 5 5s1 2.5 2.5 2.5z"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2.5 12.5c0-2.5 5-2.5 5-2.5s5 0 5 2.5v0h-10z"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
               <input
                 type="text"
                 name="HoTen"
@@ -106,31 +117,8 @@ export default function Register() {
             </div>
             {errors.HoTen && <span className="text-red-500 text-sm">{errors.HoTen}</span>}
 
+            {/* Email */}
             <div className={`${inputWrapperClass} ${errors.Email ? "border-red-500" : ""}`}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 15 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M2 4.5l5.5 3.5L13 4.5"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <rect
-                  x="2"
-                  y="3"
-                  width="11"
-                  height="8"
-                  rx="1.5"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                />
-              </svg>
               <input
                 type="email"
                 name="Email"
@@ -142,30 +130,8 @@ export default function Register() {
             </div>
             {errors.Email && <span className="text-red-500 text-sm">{errors.Email}</span>}
 
+            {/* Mật khẩu */}
             <div className={`${inputWrapperClass} ${errors.MatKhau ? "border-red-500" : ""}`}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 15 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="3"
-                  y="6"
-                  width="9"
-                  height="6"
-                  rx="1"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                />
-                <path
-                  d="M7.5 6V4.5a1.5 1.5 0 0 1 3 0V6"
-                  stroke="#6B7280"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-              </svg>
               <input
                 type="password"
                 name="MatKhau"
@@ -177,6 +143,7 @@ export default function Register() {
             </div>
             {errors.MatKhau && <span className="text-red-500 text-sm">{errors.MatKhau}</span>}
 
+            {/* Số điện thoại */}
             <div className={`${inputWrapperClass} ${errors.SoDienThoai ? "border-red-500" : ""}`}>
               <input
                 type="text"
@@ -187,8 +154,11 @@ export default function Register() {
                 className={inputClass}
               />
             </div>
-            {errors.SoDienThoai && <span className="text-red-500 text-sm">{errors.SoDienThoai}</span>}
+            {errors.SoDienThoai && (
+              <span className="text-red-500 text-sm">{errors.SoDienThoai}</span>
+            )}
 
+            {/* Địa chỉ */}
             <div className={`${inputWrapperClass} ${errors.DiaChi ? "border-red-500" : ""}`}>
               <input
                 type="text"
@@ -210,9 +180,10 @@ export default function Register() {
 
             <button
               type="submit"
+              disabled={loading}
               className="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg transition-all"
             >
-              Đăng ký
+              {loading ? "Đang xử lý..." : "Đăng ký"}
             </button>
           </form>
         </div>

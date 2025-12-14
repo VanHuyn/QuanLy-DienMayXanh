@@ -1,26 +1,45 @@
 import { Link } from "react-router-dom";
 import Meta from "../../components/Meta";
 import { useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const { login } = useAuth();
   const [form, setForm] = useState({ Email: "", MatKhau: "" });
   const [errors, setErrors] = useState({});
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Kiểm tra rỗng
     const newErrors = {};
     if (!form.Email.trim()) newErrors.Email = "Email là bắt buộc";
     if (!form.MatKhau.trim()) newErrors.MatKhau = "Mật khẩu là bắt buộc";
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Login data:", form);
-      alert("Đăng nhập thành công (chỉ demo UI)!");
+    if (Object.keys(newErrors).length > 0) return;
+
+    try {
+      const user = await login(form.Email, form.MatKhau);
+
+      const role = user?.VaiTro?.Ten;
+
+      // Điều hướng theo vai trò
+      if (["Admin", "QuanLy", "NhanVienBanHang", "NhanVienKhoTong", "NhanVienKhoChiNhanh"].includes(role)) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || "Đăng nhập thất bại");
     }
   };
 
@@ -34,6 +53,7 @@ export default function Login() {
         title="Đăng nhập tài khoản Điện Máy Xanh"
         description="Đăng nhập tài khoản Điện Máy Xanh"
       />
+
       <div className="flex flex-col md:flex-row py-10 md:py-40 gap-8 items-center">
         <div className="w-full md:w-1/2">
           <img
@@ -42,6 +62,7 @@ export default function Login() {
             className="w-full rounded-xl"
           />
         </div>
+
         <div className="w-full md:w-1/2">
           <form
             onSubmit={handleSubmit}
@@ -50,35 +71,14 @@ export default function Login() {
             <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
               Đăng nhập
             </h2>
+
+            {/* Email */}
             <div className="flex flex-col mb-5">
               <div
                 className={`${inputWrapperClass} ${
                   errors.Email ? "border-red-500" : ""
                 }`}
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="m2.5 4.375 3.875 2.906c.667.5 1.583.5 2.25 0L12.5 4.375"
-                    stroke="#6B7280"
-                    strokeOpacity=".6"
-                    strokeWidth="1.3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M11.875 3.125h-8.75c-.69 0-1.25.56-1.25 1.25v6.25c0 .69.56 1.25 1.25 1.25h8.75c.69 0 1.25-.56 1.25-1.25v-6.25c0-.69-.56-1.25-1.25-1.25Z"
-                    stroke="#6B7280"
-                    strokeOpacity=".6"
-                    strokeWidth="1.3"
-                    strokeLinecap="round"
-                  />
-                </svg>
                 <input
                   type="email"
                   name="Email"
@@ -94,35 +94,14 @@ export default function Login() {
                 </span>
               )}
             </div>
+
+            {/* Password */}
             <div className="flex flex-col mb-5">
               <div
                 className={`${inputWrapperClass} ${
                   errors.MatKhau ? "border-red-500" : ""
                 }`}
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="m2.5 4.375 3.875 2.906c.667.5 1.583.5 2.25 0L12.5 4.375"
-                    stroke="#6B7280"
-                    strokeOpacity=".6"
-                    strokeWidth="1.3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M11.875 3.125h-8.75c-.69 0-1.25.56-1.25 1.25v6.25c0 .69.56 1.25 1.25 1.25h8.75c.69 0 1.25-.56 1.25-1.25v-6.25c0-.69-.56-1.25-1.25-1.25Z"
-                    stroke="#6B7280"
-                    strokeOpacity=".6"
-                    strokeWidth="1.3"
-                    strokeLinecap="round"
-                  />
-                </svg>
                 <input
                   type="password"
                   name="MatKhau"
@@ -138,6 +117,11 @@ export default function Login() {
                 </span>
               )}
             </div>
+
+            {/* Error message */}
+            {errorMsg && (
+              <p className="text-red-600 text-center mb-3">{errorMsg}</p>
+            )}
 
             <p className="text-end my-4">
               Bạn chưa có tài khoản?{" "}
