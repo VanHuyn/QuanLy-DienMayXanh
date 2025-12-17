@@ -14,7 +14,15 @@ import { ShoppingBag, Layers, Users, Truck } from "lucide-react";
 import Meta from "../../components/Meta";
 
 // Register chart plugins
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 export default function AdminDashboard() {
   const [stats] = useState({
@@ -42,18 +50,13 @@ export default function AdminDashboard() {
       {
         label: "Khách hàng",
         data: [120, 50, 20, 10],
-        backgroundColor: [
-          "#D1FAE5",
-          "#6EE7B7",
-          "#10B981",
-          "#047857",
-        ],
+        backgroundColor: ["#D1FAE5", "#6EE7B7", "#10B981", "#047857"],
       },
     ],
   };
 
   return (
-    <div className="p-8 flex-1 bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen">
+    <div className="p-8 flex-1 bg-linear-to-br from-slate-100 to-slate-200 min-h-screen">
       <Meta title="Admin Dashboard" />
 
       {/* Header */}
@@ -68,9 +71,8 @@ export default function AdminDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 mb-10">
-        
         {/* CARD TEMPLATE */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
+        <div className="bg-linear-to-br from-blue-500 to-blue-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-80">Sản phẩm</p>
@@ -80,7 +82,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
+        <div className="bg-linear-to-br from-emerald-500 to-emerald-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-80">Danh mục</p>
@@ -90,7 +92,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-amber-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
+        <div className="bg-linear-to-br from-amber-500 to-amber-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-80">Nhà cung cấp</p>
@@ -100,7 +102,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
+        <div className="bg-linear-to-br from-purple-500 to-purple-400 text-white p-6 rounded-2xl shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-80">Khách hàng</p>
@@ -109,12 +111,10 @@ export default function AdminDashboard() {
             <Users size={42} className="opacity-80" />
           </div>
         </div>
-
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
         {/* BAR CHART */}
         <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
@@ -142,7 +142,6 @@ export default function AdminDashboard() {
             }}
           />
         </div>
-
       </div>
     </div>
   );

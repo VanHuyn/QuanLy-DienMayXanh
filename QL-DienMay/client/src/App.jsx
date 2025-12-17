@@ -13,6 +13,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import { Toaster } from "react-hot-toast";
 import RoleManagement from "./pages/admin/RoleManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import CategoryManagement from "./pages/admin/CategoryManagement";
+import SupplierManagement from "./pages/admin/SupplierManagement";
 export default function App() {
   return (
     <div>
@@ -28,14 +30,16 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-         {/* <Route element={<ProtectedRoute allowedRoles={["admin"]} />}> */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="roles" element={<RoleManagement />} />
-            <Route path="accounts" element={<UserManagement />} />
-            {/* danh mục */}
-            <Route path="*" element={<NotFound />} />
-          </Route>
+        {/* <Route element={<ProtectedRoute allowedRoles={["admin"]} />}> */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="roles" element={<RoleManagement />} />
+          <Route path="accounts" element={<UserManagement />} />
+          {/* danh mục */}
+          <Route path="categories" element={<CategoryManagement />} />
+          <Route path="suppliers" element={<SupplierManagement />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
         {/* </Route> */}
       </Routes>
       <Toaster position="top-right" />

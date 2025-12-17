@@ -34,7 +34,7 @@ export default function Login() {
 
       // Điều hướng theo vai trò
       if (["Admin", "QuanLy", "NhanVienBanHang", "NhanVienKhoTong", "NhanVienKhoChiNhanh"].includes(role)) {
-        navigate("/admin");
+        navigate("/admin/dashboard");
       } else {
         navigate("/");
       }

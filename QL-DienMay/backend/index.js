@@ -28,7 +28,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/roles", roleRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/categories", categoryRoute);
-app.use("/api/v1/supplier", supplierRoute);
+app.use("/api/v1/suppliers", supplierRoute);
 
 // Kết nối database
 KetNoiCsdl();
