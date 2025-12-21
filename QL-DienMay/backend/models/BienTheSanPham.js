@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       SanPhamId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
       Ten: { type: DataTypes.STRING(200), allowNull: true },
       Gia: { type: DataTypes.DECIMAL(15, 2), allowNull: true },
-      SoLuongTon: { type: DataTypes.INTEGER.UNSIGNED, defaultValue: 0 },
     },
     { tableName: "BienTheSanPham", timestamps: true }
   );

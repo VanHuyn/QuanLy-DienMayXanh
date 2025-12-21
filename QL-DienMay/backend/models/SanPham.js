@@ -7,7 +7,13 @@ module.exports = (sequelize, DataTypes) => {
     MoTa: { type: DataTypes.TEXT, allowNull: true },
     Gia: { type: DataTypes.DECIMAL(15,2), allowNull: false, defaultValue: 0 },
     DanhMucId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
-    // DonViTinhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    GiaKhuyenMai: { type: DataTypes.DECIMAL(15,2), allowNull: true },
+    ThuongHieu: { type: DataTypes.STRING(150), allowNull: true },
+    XuatXu: { type: DataTypes.STRING(150), allowNull: true },
+    TrongLuong: { type: DataTypes.FLOAT, allowNull: true },
+    KichThuoc: { type: DataTypes.STRING(150), allowNull: true },
+    AnhDaiDien: { type: DataTypes.STRING(500), allowNull: true },
+    LuotXem: { type: DataTypes.INTEGER, defaultValue: 0 },
     TrangThai: { type: DataTypes.ENUM('DangBan','TamNgung','HetHang'), defaultValue: 'DangBan' },
   }, { tableName: 'SanPham', timestamps: true });
 

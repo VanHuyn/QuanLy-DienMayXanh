@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { User, LogOut } from "lucide-react";
 import { menuAdmin } from "../../data/index";
 import useAuth from "../../hooks/useAuth";
-import { toast } from "react-hot-toast";
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -67,8 +66,6 @@ export default function AdminLayout() {
                     <User size={18} className="text-blue-700" /> Hồ sơ
                   </Link>
                 </li>
-
-                {/* Logout */}
                 <li
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-3 text-red-500 hover:bg-gray-50 cursor-pointer"
@@ -85,11 +82,11 @@ export default function AdminLayout() {
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside className="w-60 bg-white border-r border-gray-200 p-4 flex flex-col gap-1">
-          {menuAdmin.map((item) => {
+          {menuAdmin.map((item,index) => {
             const Icon = item.icon;
             return (
               <Link
-                key={item.path}
+                key={index}
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium transition-colors duration-200 border-l-4 ${
                   location.pathname === item.path

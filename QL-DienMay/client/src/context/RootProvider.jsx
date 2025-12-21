@@ -3,6 +3,14 @@ import { RoleProvider } from "../context/RoleContext";
 import { UserProvider } from "../context/UserContext";
 import { SupplierProvider } from "../context/SupplierContext";
 import { CategoryProvider } from "../context/CategoryContext";
+import { ProductProvider } from "../context/ProductContext";
+import { WarehouseProvider } from "../context/WarehouseContext";
+import { SupplierImportProvider } from "../context/SupplierImportContext";
+import { SupplierImportDetailProvider } from "../context/SupplierImportDetailContext";
+import { ProductVariantProvider } from "../context/ProductVariantContext";
+import { InventoryProvider } from "../context/InventoryContext";
+import { BranchProvider } from "../context/BranchContext";
+import { BranchWarehouseProvider } from "../context/BranchWarehouseContext";
 
 export default function RootProvider({ children }) {
   return (
@@ -10,7 +18,25 @@ export default function RootProvider({ children }) {
       <RoleProvider>
         <UserProvider>
           <CategoryProvider>
-            <SupplierProvider>{children}</SupplierProvider>
+            <SupplierProvider>
+              <ProductProvider>
+                <WarehouseProvider>
+                  <SupplierImportProvider>
+                    <SupplierImportDetailProvider>
+                      <ProductVariantProvider>
+                        <InventoryProvider>
+                          <BranchProvider>
+                            <BranchWarehouseProvider>
+                              {children}
+                            </BranchWarehouseProvider>
+                          </BranchProvider>
+                        </InventoryProvider>
+                      </ProductVariantProvider>
+                    </SupplierImportDetailProvider>
+                  </SupplierImportProvider>
+                </WarehouseProvider>
+              </ProductProvider>
+            </SupplierProvider>
           </CategoryProvider>
         </UserProvider>
       </RoleProvider>

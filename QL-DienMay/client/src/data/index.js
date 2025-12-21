@@ -24,6 +24,11 @@ import {
   ShoppingCart,
   PackageCheck,
   ShieldCheck,
+  Store,
+  FilePlus,
+  FileMinus,
+  Repeat,
+  AlertTriangle,
 } from "lucide-react";
 
 export const menuHeader = [
@@ -609,26 +614,38 @@ export const menuAdmin = [
   { path: "/admin/dashboard", label: "Trang chủ", icon: Home },
   { path: "/admin/roles", label: "Phân quyền", icon: ShieldCheck },
   { path: "/admin/accounts", label: "Quản lý tài khoản", icon: Users },
-  // Quản lý sản phẩm
   { path: "/admin/categories", label: "Danh mục sản phẩm", icon: Layers },
   { path: "/admin/products", label: "Sản phẩm", icon: Package },
-
-  // Quản lý người dùng
-
-  // Nhà cung cấp
-  { path: "/admin/suppliers", label: "Nhà cung cấp (NCC)", icon: Truck },
-
-  // Khuyến mãi
   {
     path: "/admin/promotions",
     label: "Khuyến mãi & ưu đãi",
     icon: BadgePercent,
   },
+  // ncc
+  { path: "/admin/suppliers", label: "Nhà cung cấp (NCC)", icon: Truck },
+  { path: "/admin/branchs", label: "Quản lý chi nhánh", icon: Truck },
+  { path: "/admin/branch-warehouses", label: "Quản lý kho chi nhánh", icon: Truck },
+  {
+    path: "/admin/supplier-imports",
+    label: "Phiếu nhập từ NCC",
+    icon: FilePlus,
+  },
+  { path: "/admin/warehouses", label: "Kho tổng", icon: Warehouse },
+  // { path: "/admin/warehousebranch", label: "Kho chi nh", icon: Warehouse },
+  { path: "/admin/inventory", label: "Tồn kho", icon: Boxes },
+  {
+    path: "/admin/inventory-check",
+    label: "Kiểm kê & điều chỉnh",
+    icon: ClipboardCheck,
+  },
+
+  // Luồng kho
+  { path: "/admin/exports", label: "Xuất kho cho chi nhánh", icon: FileMinus },
+  { path: "/admin/transfers", label: "Điều chuyển kho", icon: Repeat },
 
   // Hệ thống thống kê lớn
   { path: "/admin/statistics", label: "Thống kê hệ thống", icon: BarChart4 },
   { path: "/admin/inventory", label: "Tồn kho toàn hệ thống", icon: Boxes },
-
   // Cấu hình
   { path: "/admin/settings", label: "Cài đặt hệ thống", icon: Settings },
 ];
