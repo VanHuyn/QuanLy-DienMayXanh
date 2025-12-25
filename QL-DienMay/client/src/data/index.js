@@ -641,7 +641,7 @@ export const menuAdmin = [
 
   // Luồng kho
   { path: "/admin/exports", label: "Xuất kho cho chi nhánh", icon: FileMinus },
-  { path: "/admin/transfers", label: "Điều chuyển kho", icon: Repeat },
+  // { path: "/admin/transfers", label: "Điều chuyển kho", icon: Repeat },
 
   // Hệ thống thống kê lớn
   { path: "/admin/statistics", label: "Thống kê hệ thống", icon: BarChart4 },

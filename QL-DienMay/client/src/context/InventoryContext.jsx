@@ -9,13 +9,14 @@ export const InventoryProvider = ({ children }) => {
   const [inventories, setInventories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Lấy tồn kho
+  // =======================
+  // LẤY TỒN KHO
+  // =======================
   const fetchInventories = async () => {
     setLoading(true);
     try {
       const data = await inventoryService.getAll();
 
-      // thêm SoLuongThucTe để kiểm kê
       const mapped = data.map((i) => ({
         ...i,
         SoLuongThucTe: i.SoLuong,
@@ -23,14 +24,22 @@ export const InventoryProvider = ({ children }) => {
 
       setInventories(mapped);
     } catch (e) {
-      console.error("Lỗi lấy tồn kho", e);
       toast.error("Không tải được tồn kho");
     } finally {
       setLoading(false);
     }
   };
 
-  // cập nhật tồn thực tế
+  // =======================
+  // 🔥 CHỈ LẤY TỒN KHO TỔNG CÓ HÀNG
+  // =======================
+  const khoTongInventories = inventories.filter(
+    (i) => i.KhoTongId && Number(i.SoLuong) > 0
+  );
+
+  // =======================
+  // KIỂM KÊ
+  // =======================
   const updateSoLuongThucTe = (id, value) => {
     setInventories((prev) =>
       prev.map((i) =>
@@ -39,7 +48,6 @@ export const InventoryProvider = ({ children }) => {
     );
   };
 
-  // gửi kiểm kê
   const submitInventoryCheck = async (KhoTongId, GhiChu = "") => {
     const ChiTiet = inventories
       .filter((i) => Number(i.SoLuongThucTe) !== Number(i.SoLuong))
@@ -59,10 +67,33 @@ export const InventoryProvider = ({ children }) => {
         GhiChu,
         ChiTiet,
       });
-      toast.success("Kiểm kê & điều chỉnh thành công");
+      toast.success("Kiểm kê thành công");
       fetchInventories();
     } catch (e) {
-      toast.error(e.response?.data?.message || "Lỗi kiểm kê");
+      toast.error("Lỗi kiểm kê");
+    }
+  };
+
+  // =======================
+  // 🔥 XUẤT KHO CHO CHI NHÁNH
+  // =======================
+  const exportToBranch = async ({
+    bienTheId,
+    khoTongId,
+    khoChiNhanhId,
+    soLuong,
+  }) => {
+    try {
+      await inventoryService.exportToBranch({
+        bienTheId,
+        khoTongId,
+        khoChiNhanhId,
+        soLuong,
+      });
+      toast.success("Xuất kho thành công");
+      fetchInventories();
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Xuất kho thất bại");
     }
   };
 
@@ -75,10 +106,13 @@ export const InventoryProvider = ({ children }) => {
       value={{
         inventories,
         loading,
+        // 🔥 DÙNG CHO FORM XUẤT KHO
+        khoTongInventories,
+
         fetchInventories,
-        // kiểm kê
         updateSoLuongThucTe,
         submitInventoryCheck,
+        exportToBranch,
       }}
     >
       {children}

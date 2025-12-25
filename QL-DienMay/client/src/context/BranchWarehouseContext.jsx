@@ -15,7 +15,7 @@ export const BranchWarehouseProvider = ({ children }) => {
       const data = await branchWarehouseService.getAll();
       setWarehouses(data);
     } catch (e) {
-      toast.error("Cannot load branch warehouses");
+      toast.error("Không thể tải được kho chi nhánh");
     } finally {
       setLoading(false);
     }

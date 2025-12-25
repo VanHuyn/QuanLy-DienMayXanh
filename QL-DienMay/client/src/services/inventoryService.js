@@ -14,11 +14,19 @@ const inventoryService = {
   // Kiểm kê & điều chỉnh tồn kho
   adjustInventory: async (data) => {
     const res = await axios.post(
-      "http://localhost:5000/api/v1/inventory-check",
+      `${API_URL}-check`,
       data,
-      {
-        withCredentials: true,
-      }
+      { withCredentials: true }
+    );
+    return res.data;
+  },
+
+  // 🔥 XUẤT KHO CHO CHI NHÁNH
+  exportToBranch: async (data) => {
+    const res = await axios.post(
+      `${API_URL}/export-kho-tong`,
+      data,
+      { withCredentials: true }
     );
     return res.data;
   },

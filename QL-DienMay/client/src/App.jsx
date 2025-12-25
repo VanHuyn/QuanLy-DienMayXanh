@@ -23,6 +23,7 @@ import InventoryPage from "./pages/admin/InventoryPage";
 import InventoryCheckPage from "./pages/admin/InventoryCheckPage";
 import BranchManagement from "./pages/admin/BranchManagement";
 import BranchWarehouseManagement from "./pages/admin/BranchWarehouseManagement";
+import ExportToBranchPage from "./pages/admin/ExportToBranchPage";
 export default function App() {
   return (
     <div>
@@ -55,6 +56,7 @@ export default function App() {
           {/* tồn kho */}
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="inventory-check" element={<InventoryCheckPage />} />
+          <Route path="exports" element={<ExportToBranchPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         {/* </Route> */}
