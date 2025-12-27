@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "SanPhamId",
       as: "SanPham",
     });
+    BienTheSanPham.hasMany(models.AnhSanPham, {
+      foreignKey: "SanPhamId", // nếu ảnh dùng SanPhamId
+      sourceKey: "SanPhamId",
+      as: "AnhSanPhams",
+    });
+
     BienTheSanPham.hasMany(models.ChiTietDonHang, {
       foreignKey: "BienTheSanPhamId",
       as: "ChiTietDonHangs",

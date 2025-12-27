@@ -1,5 +1,5 @@
 const { DanhMuc } = require("../models");
-
+const slugify = require("slugify");
 class CategoryService {
   async getAll() {
     return await DanhMuc.findAll({ order: [["Id", "DESC"]] });
@@ -15,15 +15,38 @@ class CategoryService {
     return await DanhMuc.create({
       Ten: data.Ten,
       MoTa: data.MoTa || null,
+      Slug: data.Slug
+        ? slugify(data.Slug, { lower: true, strict: true, locale: "vi" })
+        : slugify(data.Ten, { lower: true, strict: true, locale: "vi" }),
     });
   }
 
   async update(id, data) {
     const danhMuc = await this.getById(id);
-    return await danhMuc.update({
-      Ten: data.Ten,
-      MoTa: data.MoTa,
-    });
+    const payload = {};
+
+    if (data.Ten !== undefined) {
+      payload.Ten = data.Ten;
+      payload.Slug = slugify(data.Ten, {
+        lower: true,
+        strict: true,
+        locale: "vi",
+      });
+    }
+
+    if (data.MoTa !== undefined) {
+      payload.MoTa = data.MoTa;
+    }
+
+    if (data.Slug) {
+      payload.Slug = slugify(data.Slug, {
+        lower: true,
+        strict: true,
+        locale: "vi",
+      });
+    }
+    console.log(payload)
+    return await danhMuc.update(payload);
   }
 
   async delete(id) {

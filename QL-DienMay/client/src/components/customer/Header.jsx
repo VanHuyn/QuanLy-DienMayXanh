@@ -14,14 +14,15 @@ import {
 import MegaMenuHeader from "./MegaMenuHeader";
 import { menuHeader } from "../../data";
 import useAuth from "../../hooks/useAuth";
-
+import { useCart } from "../../context/CartContext";
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
+  const { cart } = useCart();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const totalItems = cart?.ChiTietGioHangs?.length || 0;
 
   const handleLogout = async () => {
     await logout();
@@ -41,7 +42,7 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  console.log(totalItems);
   return (
     <header className="w-full bg-white shadow-md sticky top-0 z-50">
       {/* BANNER */}
@@ -148,8 +149,8 @@ export default function Header() {
             >
               <ShoppingCart size={20} />
               <span className="hidden sm:inline text-sm">Giỏ hàng</span>
-              <span className="absolute -top-1.5 -right-3 bg-white text-red-600 text-[11px] font-bold px-1.5 h-[18px] min-w-[18px] flex items-center justify-center rounded-full border border-red-500">
-                2
+              <span className="absolute -top-1.5 -right-4 bg-white text-red-600 text-[11px] font-bold px-1.5 h-[18px] min-w-[18px] flex items-center justify-center rounded-full border border-red-500">
+                {totalItems}
               </span>
             </Link>
             <button

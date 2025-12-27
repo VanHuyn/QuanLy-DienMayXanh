@@ -1,12 +1,15 @@
 const jwt = require("jsonwebtoken");
-const { NguoiDung, VaiTro,KhachHang } = require("../models");
+const { NguoiDung, VaiTro, KhachHang } = require("../models");
 const { comparePassword, hashPassword } = require("../utils/password");
 
 class AuthService {
   async login(Email, MatKhau) {
     const user = await NguoiDung.findOne({
       where: { Email },
-      include: [{ model: VaiTro, as: "VaiTro" }],
+      include: [
+        { model: VaiTro, as: "VaiTro" },
+        { model: KhachHang, as: "KhachHang" },
+      ],
     });
     if (!user) throw new Error("Sai email hoặc mật khẩu");
     const isValid = await comparePassword(MatKhau, user.MatKhau);
@@ -16,6 +19,7 @@ class AuthService {
       {
         userId: user.Id,
         role: user.VaiTro.Ten,
+        khachHangId: user.KhachHang?.Id,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }

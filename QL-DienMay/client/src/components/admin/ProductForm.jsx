@@ -7,6 +7,7 @@ export default function ProductForm({
   onSubmit,
   onCancel,
   isEdit,
+  loading,
 }) {
   const { categories } = useCategories();
   const [images, setImages] = useState([]);
@@ -138,15 +139,26 @@ export default function ProductForm({
 
       {/* ẢNH */}
       <div className="md:col-span-2">
-        <label className="font-medium">Ảnh sản phẩm</label>
+        <label className="font-medium block mb-1">Ảnh sản phẩm</label>
+        {/* INPUT FILE ẨN */}
         <input
+          id="product-images"
           type="file"
           multiple
           accept="image/*"
           onChange={(e) => setImages([...e.target.files])}
-          className="mt-1"
+          className="hidden"
         />
 
+        {/* LABEL GIẢ LÀ NÚT */}
+        <label
+          htmlFor="product-images"
+          className="inline-flex items-center justify-center px-4 py-2 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer text-blue-600 hover:bg-blue-50 transition"
+        >
+          📷 Click vào đây để chọn ảnh sản phẩm
+        </label>
+
+        {/* PREVIEW */}
         {images.length > 0 && (
           <div className="flex gap-2 mt-3 flex-wrap">
             {images.map((img, i) => (
@@ -169,8 +181,13 @@ export default function ProductForm({
         >
           Huỷ
         </button>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded">
-          {isEdit ? "Cập nhật" : "Thêm mới"}
+        <button
+          disabled={loading}
+          className={`px-4 py-2 rounded text-white ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+          }`}
+        >
+          {loading ? "Đang xử lý..." : isEdit ? "Cập nhật" : "Thêm mới"}
         </button>
       </div>
     </form>

@@ -1,103 +1,109 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import Meta from "../../components/Meta";
-
-const testCart = [
-  {
-    id: 1,
-    name: "Máy lọc nước Kangaroo KG10A3 - 10 Lít",
-    price: 4500000,
-    image: "https://cdnv2.tgdd.vn/mwg-static/product/76/281176/may-loc-nuoc-kangaroo-kg10a3-600x600.jpg",
-    qty: 1,
-    discount: 10,
-  },
-  {
-    id: 2,
-    name: "Máy lọc không khí Sharp FP-J40E-W",
-    price: 3500000,
-    image: "https://cdn.tgdd.vn/Products/Images/2853/259769/sharp-fp-j40e-w-600x600.jpg",
-    qty: 2,
-    discount: 0,
-  },
-];
+import { useCart } from "../../context/CartContext";
 
 export default function CartPage() {
-  const [cart, setCart] = useState(testCart);
+  const { cart, updateItem, removeItem, clearCart } = useCart();
+  const [localCart, setLocalCart] = useState([]);
+  useEffect(() => {
+    if (cart?.ChiTietGioHangs) setLocalCart(cart.ChiTietGioHangs);
+  }, [cart]);
 
-  const updateQty = (id, delta) => {
-    setCart(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, qty: Math.max(item.qty + delta, 1) } : item
-      )
+  if (!cart || cart.ChiTietGioHangs.length === 0)
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-500 text-lg mb-6">
+          Chưa có sản phẩm nào trong giỏ hàng.
+        </p>
+        <Link
+          to="/"
+          className="px-6 py-3 bg-linear-to-r from-indigo-500 to-blue-500 text-white rounded-xl shadow-lg hover:from-indigo-600 hover:to-blue-600 transition"
+        >
+          Quay lại mua sắm
+        </Link>
+      </div>
     );
+
+  const handleQtyChange = async (itemId, delta) => {
+    const item = localCart.find((i) => i.Id === itemId);
+    if (!item) return;
+
+    const newQty = Math.max(item.SoLuong + delta, 1);
+
+    setLocalCart((prev) =>
+      prev.map((i) => (i.Id === itemId ? { ...i, SoLuong: newQty } : i))
+    );
+    await updateItem(itemId, newQty);
   };
 
-  const removeItem = id => {
-    setCart(prev => prev.filter(item => item.id !== id));
+  const handleRemove = async (itemId) => {
+    setLocalCart((prev) => prev.filter((i) => i.Id !== itemId));
+    await removeItem(itemId);
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const totalPrice = localCart.reduce(
+    (sum, item) => sum + Number(item.BienTheSanPham.Gia) * item.SoLuong,
+    0
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <Meta title={"Chào mừng bạn đến với giỏ hàng"} description={"Chào mừng bạn đến với giỏ hàng"} />
+      <Meta title="Giỏ hàng của bạn" description="Xem và quản lý giỏ hàng của bạn" />
       <h1 className="text-3xl font-bold mb-8 text-gray-900">Giỏ hàng</h1>
 
-      {cart.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-500 text-lg mb-6">Chưa có sản phẩm nào trong giỏ hàng.</p>
-          <Link
-            to="/"
-            className="px-6 py-3 bg-linear-to-r from-indigo-500 to-blue-500 text-white rounded-xl shadow-lg hover:from-indigo-600 hover:to-blue-600 transition"
-          >
-            Quay lại mua sắm
-          </Link>
-        </div>
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 flex flex-col gap-4">
-            {cart.map(item => (
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 flex flex-col gap-4">
+          {localCart.map((item) => {
+            const product = item.BienTheSanPham;
+            const mainImage =
+              product.SanPham.AnhSanPhams[0]?.Url || "/no-image.png";
+
+            return (
               <div
-                key={item.id}
+                key={item.Id}
                 className="flex flex-col sm:flex-row items-center bg-white rounded-3xl shadow-md p-4 gap-4 hover:shadow-xl transition"
               >
                 <div className="relative w-32 h-32 shrink-0">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={mainImage}
+                    alt={product.Ten}
                     className="w-full h-full object-contain rounded-2xl"
                   />
-                  {item.discount > 0 && (
-                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-lg shadow">
-                      -{item.discount}%
-                    </span>
-                  )}
                 </div>
                 <div className="flex-1 flex flex-col justify-between h-full">
-                  <p className="font-semibold text-gray-900 text-lg">{item.name}</p>
-                  <p className="text-red-600 font-bold text-xl mt-1">{item.price.toLocaleString()}₫</p>
+                  <p className="font-semibold text-gray-900 text-lg">
+                    {product.Ten}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    {product.SanPham.ThuongHieu} | {product.SanPham.XuatXu}
+                  </p>
+                  <p className="text-red-600 font-bold text-xl mt-1">
+                    {Number(product.Gia).toLocaleString()}₫
+                  </p>
+
                   <div className="flex items-center gap-3 mt-4">
                     <button
-                      onClick={() => updateQty(item.id, -1)}
+                      onClick={() => handleQtyChange(item.Id, -1)}
                       className="flex items-center justify-center w-10 h-10 border rounded-lg hover:bg-gray-100 transition"
                     >
                       <FiMinus />
                     </button>
                     <input
                       type="text"
-                      value={item.qty}
+                      value={item.SoLuong}
                       readOnly
                       className="w-12 text-center border rounded-lg py-2 text-gray-800 font-semibold"
                     />
                     <button
-                      onClick={() => updateQty(item.id, 1)}
+                      onClick={() => handleQtyChange(item.Id, 1)}
                       className="flex items-center justify-center w-10 h-10 border rounded-lg hover:bg-gray-100 transition"
                     >
                       <FiPlus />
                     </button>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemove(item.Id)}
                       className="ml-4 text-white bg-red-500 hover:bg-red-600 p-2 rounded-lg shadow transition"
                     >
                       <FiTrash2 size={20} />
@@ -105,28 +111,36 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="w-full lg:w-96 bg-white rounded-3xl shadow-md p-6 flex flex-col gap-6 sticky top-6">
-            <h2 className="font-bold text-2xl text-gray-900">Tóm tắt đơn hàng</h2>
-            <div className="flex justify-between text-gray-700 text-lg">
-              <span>Số lượng sản phẩm:</span>
-              <span>{cart.reduce((sum, item) => sum + item.qty, 0)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-red-600 text-2xl">
-              <span>Tổng tiền:</span>
-              <span>{totalPrice.toLocaleString()}₫</span>
-            </div>
-            <button className="w-full px-4 py-3 bg-linear-to-r from-indigo-500 to-blue-500 text-white font-semibold rounded-2xl shadow-lg hover:from-indigo-600 hover:to-blue-600 transition">
-              Thanh toán ngay
-            </button>
-            <p className="text-sm text-gray-500 mt-2">
-              Vui lòng kiểm tra giỏ hàng trước khi thanh toán.
-            </p>
-          </div>
+            );
+          })}
+          <button
+            onClick={() => clearCart()}
+            className="mt-4 w-fit px-4 py-3 bg-red-500 cursor-pointer text-white font-semibold rounded-2xl shadow-lg hover:bg-red-600 transition"
+          >
+            Xoá toàn bộ giỏ hàng
+          </button>
         </div>
-      )}
+
+        <div className="w-full lg:w-96 bg-white rounded-3xl shadow-md p-6 flex flex-col gap-6 sticky top-6">
+          <h2 className="font-bold text-2xl text-gray-900">Tóm tắt đơn hàng</h2>
+          <div className="flex justify-between text-gray-700 text-lg">
+            <span>Số lượng sản phẩm:</span>
+            <span>
+              {localCart.reduce((sum, item) => sum + item.SoLuong, 0)}
+            </span>
+          </div>
+          <div className="flex justify-between font-bold text-red-600 text-2xl">
+            <span>Tổng tiền:</span>
+            <span>{totalPrice.toLocaleString()}₫</span>
+          </div>
+          <Link to='/dat-hang' className="text-center w-full cursor-pointer px-4 py-3 bg-linear-to-r from-indigo-500 to-blue-500 text-white font-semibold rounded-2xl shadow-lg hover:from-indigo-600 hover:to-blue-600 transition">
+            Thanh toán ngay
+          </Link>
+          <p className="text-sm text-gray-500 mt-2">
+            Vui lòng kiểm tra giỏ hàng trước khi thanh toán.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

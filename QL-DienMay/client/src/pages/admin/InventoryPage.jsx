@@ -1,15 +1,30 @@
+import { useEffect } from "react";
 import Meta from "../../components/Meta";
 import { useInventory } from "../../context/InventoryContext";
 
 export default function InventoryPage() {
-  const { inventories, loading } = useInventory();
-
+  const { inventories, loading, fetchInventories } = useInventory();
+  useEffect(() => {
+    fetchInventories();
+  }, []);
   const renderStatus = (qty) => {
     if (qty === 0)
-      return <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-600">Hết hàng</span>;
+      return (
+        <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-600">
+          Hết hàng
+        </span>
+      );
     if (qty < 5)
-      return <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Sắp hết</span>;
-    return <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-600">Còn hàng</span>;
+      return (
+        <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">
+          Sắp hết
+        </span>
+      );
+    return (
+      <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-600">
+        Còn hàng
+      </span>
+    );
   };
 
   return (

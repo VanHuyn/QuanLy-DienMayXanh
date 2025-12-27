@@ -4,13 +4,28 @@ const InventoryService = {
   getAll: async () => {
     return await TonKho.findAll({
       include: [
-        {
-          association: "BienThe",
-          include: ["SanPham"],
-        },
-        "KhoTong",
-        "KhoChiNhanh",
-      ],
+      {
+        association: "BienThe",
+        include: [
+          {
+            association: "SanPham",
+            include: [
+              {
+                association: "AnhSanPhams",
+                required: false,
+                separate: true,
+                order: [
+                  ["LaChinh", "DESC"],
+                  ["createdAt", "ASC"],
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      "KhoTong",
+      "KhoChiNhanh",
+    ],
       order: [["updatedAt", "DESC"]],
     });
   },

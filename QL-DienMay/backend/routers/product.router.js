@@ -7,6 +7,8 @@ router.put("/:id", upload.array("images", 10), ProductsController.update);
 // GET
 router.get("/", ProductsController.getAll);
 router.get("/:id", ProductsController.getById);
+router.get("/by-category/:categoryId", ProductsController.getByCategory);
+router.get("/by-category-slug/:slug", ProductsController.getByCategorySlug);
 
 // DELETE
 router.delete("/:id", ProductsController.delete);

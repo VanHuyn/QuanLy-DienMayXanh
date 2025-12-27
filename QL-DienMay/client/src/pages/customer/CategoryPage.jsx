@@ -1,14 +1,23 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { testProducts } from "../../data/index";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-
+import { useProducts } from "../../context/ProductContext";
+import { useBranches } from "../../context/BranchContext";
 export default function CategoryPage() {
   const [filterOpen, setFilterOpen] = useState(false);
-
+    const { slug } = useParams(); // slug từ URL
+  const { selectedBranch } = useBranches();
+  const { categoryProducts, fetchProductsByCategorySlug, loading } = useProducts();
+  useEffect(() => {
+    if (slug) {
+      fetchProductsByCategorySlug(slug,selectedBranch?.Id);
+    }
+  }, [slug]);
+  console.log(categoryProducts)
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumb */}
@@ -44,22 +53,22 @@ export default function CategoryPage() {
               prevEl: ".swiper-button-prev",
             }}
           >
-            {testProducts.slice(0, 10).map((product) => (
-              <SwiperSlide key={product.id}>
+            {categoryProducts.slice(0, 10).map((product) => (
+              <SwiperSlide key={product.Id}>
                 <Link
-                  to={`/san-pham/${product.id}`}
+                  to={`/san-pham/${product.Id}`}
                   className="bg-white p-3 rounded-2xl shadow hover:shadow-xl transition flex flex-col items-center w-full sm:w-[180px] md:w-[200px] lg:w-[216px] h-[500px]"
                 >
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={product.AnhSanPhams?.[0]?.Url}
+                    alt={product.Ten}
                     className="h-40 sm:h-48 md:h-52 lg:h-[300px] object-contain mb-2"
                   />
                   <p className="text-gray-800 font-medium text-sm line-clamp-2 text-center mt-2">
-                    {product.name}
+                    {product.Ten}
                   </p>
                   <p className="text-red-600 font-bold text-lg mt-auto">
-                    {product.salePrice.toLocaleString()}₫
+                    {product.GiaKhuyenMai.toLocaleString()}₫
                   </p>
                 </Link>
               </SwiperSlide>
@@ -143,22 +152,22 @@ export default function CategoryPage() {
       {/* Product List */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-          {testProducts.slice(0, 20).map((product) => (
+          {categoryProducts.slice(0, 20).map((product) => (
             <Link
-              key={product.id}
-              to={`/san-pham/${product.id}`}
+              key={product.Id}
+              to={`/san-pham/${product.Id}`}
               className="bg-white p-4 rounded-2xl border border-gray-100 shadow hover:shadow-lg transition transform hover:-translate-y-1 flex flex-col"
             >
               <img
-                src={product.image}
-                alt={product.name}
+                src={product.AnhSanPhams?.[0]?.Url}
+                alt={product.Ten}
                 className="w-full h-40 sm:h-48 md:h-52 lg:h-[300px] object-contain mb-2 rounded-xl"
               />
               <p className="text-gray-800 font-medium text-sm line-clamp-2 mb-1 mt-2">
-                {product.name}
+                {product.Ten}
               </p>
               <p className="text-red-600 font-bold text-lg mt-auto">
-                {product.salePrice.toLocaleString()}₫
+                {product.GiaKhuyenMai.toLocaleString()}₫
               </p>
             </Link>
           ))}

@@ -29,6 +29,37 @@ class ProductController {
       res.status(500).json({ success: false, message: err.message });
     }
   }
+  static async getByCategory(req, res) {
+    try {
+      const { categoryId } = req.params;
+      const { branchId } = req.query;
+      console.log({ categoryId, branchId });
+      if (!branchId) {
+        return res.status(400).json({
+          message: "Thiếu branchId",
+        });
+      }
+
+      const data = await ProductService.getByCategory(categoryId, branchId);
+      res.json({ success: true, data });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  }
+  static async getByCategorySlug(req, res) {
+    try {
+      const { slug } = req.params;
+      const { branchId } = req.query;
+      if (!branchId) {
+        return res.status(400).json({ message: "Thiếu branchId" });
+      }
+
+      const data = await ProductService.getByCategorySlug(slug, branchId);
+      res.json({ success: true, data });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  }
 
   static async update(req, res) {
     try {

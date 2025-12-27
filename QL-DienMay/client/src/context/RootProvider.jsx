@@ -11,6 +11,8 @@ import { ProductVariantProvider } from "../context/ProductVariantContext";
 import { InventoryProvider } from "../context/InventoryContext";
 import { BranchProvider } from "../context/BranchContext";
 import { BranchWarehouseProvider } from "../context/BranchWarehouseContext";
+import { CartProvider } from "../context/CartContext";
+import { OrderProvider } from "../context/OrderContext";
 
 export default function RootProvider({ children }) {
   return (
@@ -27,7 +29,9 @@ export default function RootProvider({ children }) {
                         <InventoryProvider>
                           <BranchProvider>
                             <BranchWarehouseProvider>
-                              {children}
+                              <CartProvider>
+                                <OrderProvider>{children}</OrderProvider>
+                              </CartProvider>
                             </BranchWarehouseProvider>
                           </BranchProvider>
                         </InventoryProvider>

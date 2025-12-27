@@ -19,6 +19,8 @@ const productVariantRoute = require("./routers/productVariant.router.js");
 const inventoryRoute = require("./routers/inventory.route.js");
 const inventoryCheckRouter = require("./routers/inventoryCheck.router.js");
 const branchWarehouseRouter = require("./routers/branchWarehouse.router.js");
+const cartRouter = require("./routers/cart.router.js");
+const orderRouter = require("./routers/order.router.js");
 
 
 
@@ -50,6 +52,10 @@ app.use("/api/v1/supplier-import-details", supplierImportDetailRoute);
 app.use("/api/v1/product-variants", productVariantRoute);
 app.use("/api/v1/inventory", inventoryRoute);
 app.use("/api/v1/inventory-check", inventoryCheckRouter);
+
+// giỏ hàng
+app.use('/api/v1/cart', cartRouter);
+app.use('/api/v1/orders', orderRouter);
 
 
 app.use("/api/v1/uploads", express.static("uploads"));

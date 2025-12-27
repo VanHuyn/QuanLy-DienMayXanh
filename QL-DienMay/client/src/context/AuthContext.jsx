@@ -69,6 +69,7 @@ export function AuthProvider({ children }) {
       await authService.logout();
       setUser(null);
       localStorage.removeItem("user");
+      sessionStorage.removeItem("branchId");
       toast.success("Bạn đã đăng xuất!");
     } catch (err) {
       toast.error("Không thể đăng xuất!");

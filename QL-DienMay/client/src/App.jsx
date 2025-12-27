@@ -24,6 +24,9 @@ import InventoryCheckPage from "./pages/admin/InventoryCheckPage";
 import BranchManagement from "./pages/admin/BranchManagement";
 import BranchWarehouseManagement from "./pages/admin/BranchWarehouseManagement";
 import ExportToBranchPage from "./pages/admin/ExportToBranchPage";
+import CheckoutPage from "./pages/customer/CheckoutPage";
+import OrderHistoryPage from "./pages/customer/OrderHistoryPage";
+import ProfilePage from "./pages/customer/ProfilePage";
 export default function App() {
   return (
     <div>
@@ -36,6 +39,9 @@ export default function App() {
           <Route path="/san-pham/:id" element={<ProductDetailPage />} />
           <Route path="/danh-muc/:slug" element={<CategoryPage />} />
           <Route path="/gio-hang" element={<CartPage />} />
+          <Route path="/dat-hang" element={<CheckoutPage />} />
+          <Route path="/lich-su-don-hang" element={<OrderHistoryPage />} />
+          <Route path="/thong-tin-ca-nhan" element={<ProfilePage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

@@ -7,8 +7,27 @@ import ProductList from "../../components/admin/ProductList";
 import ProductActions from "../../components/admin/ProductActions";
 
 export default function ProductManagement() {
-  const { products, createProduct, updateProduct, deleteProduct } =
-    useProducts();
+  const {
+    products,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    actionLoading,
+  } = useProducts();
+  const mapProductToForm = (p) => ({
+    Id: p.Id,
+    Ten: p.Ten || "",
+    SKU: p.SKU || "",
+    Gia: p.Gia || "",
+    GiaKhuyenMai: p.GiaKhuyenMai || "",
+    ThuongHieu: p.ThuongHieu || "",
+    XuatXu: p.XuatXu || "",
+    TrongLuong: p.TrongLuong || "",
+    KichThuoc: p.KichThuoc || "",
+    DanhMucId: p.DanhMucId || "",
+    TrangThai: p.TrangThai || "DangBan",
+    MoTa: p.MoTa || "",
+  });
 
   const emptyForm = {
     Ten: "",
@@ -37,9 +56,15 @@ export default function ProductManagement() {
 
     const formData = new FormData();
 
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    Object.entries(form).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && typeof value !== "object") {
+        formData.append(key, value);
+      }
+    });
 
-    images.forEach((img) => formData.append("images", img));
+    if (images.length > 0) {
+      images.forEach((img) => formData.append("images", img));
+    }
 
     if (isEdit) {
       await updateProduct(form.Id, formData);
@@ -76,6 +101,7 @@ export default function ProductManagement() {
           onChange={handleChange}
           onSubmit={handleSubmit}
           onCancel={() => setShowForm(false)}
+          loading={actionLoading}
           isEdit={isEdit}
         />
       )}
@@ -83,7 +109,7 @@ export default function ProductManagement() {
       <ProductList
         products={products}
         onEdit={(p) => {
-          setForm(p);
+          setForm(mapProductToForm(p));
           setIsEdit(true);
           setShowForm(true);
         }}
@@ -94,7 +120,7 @@ export default function ProductManagement() {
         selected={selected}
         onConfirm={async (id) => {
           await deleteProduct(id);
-          setSelected(null); 
+          setSelected(null);
         }}
         onCancel={() => setSelected(null)}
       />

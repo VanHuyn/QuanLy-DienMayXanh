@@ -1,12 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { testProducts } from "../../data/index";
+import { useProducts } from "../../context/ProductContext";
+import { useCart } from "../../context/CartContext";
+import useAuth from "../../hooks/useAuth";
 import { FaStar } from "react-icons/fa";
+import Meta from "../../components/Meta";
+import toast from "react-hot-toast";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const product = testProducts.find((p) => Number(p.id) === Number(id));
-  const [selectedImage, setSelectedImage] = useState(product?.image);
+  const { addItem } = useCart();
+  const { user, logout } = useAuth();
+  console.log(user);
+  const {
+    currentProduct,
+    getProductById,
+    fetchProductsByCategory,
+    categoryProducts,
+    loading,
+  } = useProducts();
+  const [selectedImage, setSelectedImage] = useState(null);
   const [reviews, setReviews] = useState([
     {
       name: "Nguyễn Văn A",
@@ -25,21 +38,36 @@ export default function ProductDetailPage() {
     rating: 0,
     content: "",
   });
-
-  if (!product)
+  useEffect(() => {
+    getProductById(id);
+  }, [id]);
+  useEffect(() => {
+    if (currentProduct?.DanhMucId) {
+      fetchProductsByCategory(currentProduct.DanhMucId);
+    }
+  }, [currentProduct]);
+  useEffect(() => {
+    if (currentProduct?.AnhSanPhams?.length) {
+      const mainImg =
+        currentProduct.AnhSanPhams.find((a) => a.LaChinh) ||
+        currentProduct.AnhSanPhams[0];
+      setSelectedImage(mainImg.Url);
+    }
+  }, [currentProduct]);
+  if (!currentProduct)
     return (
       <div className="text-center py-20 text-gray-500">
         Sản phẩm không tồn tại
       </div>
     );
 
-  const discountPercent = product.originalPrice
+  const discountPercent = currentProduct.GiaKhuyenMai
     ? Math.round(
-        ((product.originalPrice - product.salePrice) / product.originalPrice) *
+        ((currentProduct.GiaKhuyenMai - currentProduct.Gia) /
+          currentProduct.GiaKhuyenMai) *
           100
       )
     : 0;
-
   const handleReviewSubmit = (e) => {
     e.preventDefault();
     if (newReview.name && newReview.content && newReview.rating > 0) {
@@ -47,49 +75,65 @@ export default function ProductDetailPage() {
       setNewReview({ name: "", rating: 0, content: "" });
     }
   };
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+      return;
+    }
+
+    try {
+      const defaultVariant = currentProduct.BienTheSanPhams?.[0];
+      if (!defaultVariant) {
+        toast.error("Sản phẩm chưa có biến thể");
+        return;
+      }
+
+      await addItem({
+        bienTheId: defaultVariant.Id,
+        quantity: 1,
+        customerId: user.KhachHang?.Id,
+      });
+    } catch (err) {
+      toast.error(err.message || "Không thể thêm sản phẩm vào giỏ hàng");
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Breadcrumb */}
+      <Meta title={currentProduct?.Ten} />
       <div className="max-w-7xl mx-auto px-4 py-3 text-gray-600 text-sm flex flex-wrap gap-2">
         <Link to="/" className="hover:text-blue-600">
           Nồi chiên không dầu
         </Link>
         <span>›</span>
-        <span className="font-medium text-gray-800">{product.name}</span>
+        <span className="font-medium text-gray-800">{currentProduct.name}</span>
       </div>
 
-      {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-8">
-        {/* Left column */}
         <div className="md:w-7/10 flex flex-col gap-6">
-          {/* Main Image */}
           <div className="bg-white p-4 rounded-2xl shadow-lg flex justify-center items-center transition-transform hover:scale-105">
             <img
               src={selectedImage}
-              alt={product.name}
+              alt={currentProduct.name}
               className="object-contain h-96"
             />
           </div>
 
-          {/* Thumbnails */}
-          <div className="flex gap-3 overflow-x-auto py-2">
-            {[product.image].map((img, idx) => (
+          <div className="flex gap-3 overflow-x-auto py-2 px-3">
+            {currentProduct.AnhSanPhams?.map((img, idx) => (
               <img
-                key={idx}
-                src={img}
+                key={img.Id || idx}
+                src={img.Url}
                 alt={`thumb-${idx}`}
                 className={`w-24 h-24 object-contain rounded-xl cursor-pointer border-2 transition-all ${
-                  selectedImage === img
+                  selectedImage === img.Url
                     ? "border-blue-500 scale-105"
                     : "border-gray-200 hover:scale-105"
                 }`}
-                onClick={() => setSelectedImage(img)}
+                onClick={() => setSelectedImage(img.Url)}
               />
             ))}
           </div>
-
-          {/* Cam kết */}
           <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-3">
             <p className="font-semibold text-gray-800 text-lg">
               Điện Máy XANH cam kết
@@ -103,7 +147,6 @@ export default function ProductDetailPage() {
               <li>Giao hàng tận nhà nhanh chóng</li>
             </ul>
           </div>
-          {/* Review form: dưới danh sách */}
           <div className="bg-white p-6 rounded-2xl shadow-md mt-6">
             <h3 className="font-semibold text-gray-800 text-lg mb-4">
               Viết đánh giá của bạn
@@ -112,7 +155,7 @@ export default function ProductDetailPage() {
               <input
                 type="text"
                 placeholder="Tên của bạn"
-                value={newReview.name}
+                value={newReview?.name}
                 onChange={(e) =>
                   setNewReview({ ...newReview, name: e.target.value })
                 }
@@ -163,7 +206,7 @@ export default function ProductDetailPage() {
             )}
 
             <div className="space-y-4">
-              {reviews.map((r, idx) => (
+              {reviews?.map((r, idx) => (
                 <div
                   key={idx}
                   className="border rounded-xl p-4 shadow-sm hover:shadow-md transition"
@@ -193,12 +236,12 @@ export default function ProductDetailPage() {
 
           <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-3">
             <span className="text-red-600 text-3xl font-bold">
-              {product.salePrice.toLocaleString()}₫
+              {currentProduct?.Gia?.toLocaleString()}₫
             </span>
-            {product.originalPrice && (
+            {currentProduct?.GiaKhuyenMai && (
               <div className="flex items-center gap-3">
                 <span className="line-through text-gray-400">
-                  {product.originalPrice.toLocaleString()}₫
+                  {currentProduct?.GiaKhuyenMai?.toLocaleString()}₫
                 </span>
                 <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
                   -{discountPercent}%
@@ -221,10 +264,13 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="bg-linear-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md">
+            <button className="bg-linear-to-r from-indigo-500 to-indigo-600 cursor-pointer hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md">
               Mua ngay
             </button>
-            <button className="border border-gray-300 hover:border-gray-500 text-gray-800 font-medium py-3 rounded-xl transition-all shadow-sm">
+            <button
+              onClick={handleAddToCart}
+              className="border border-gray-300 hover:border-gray-500 cursor-pointer text-gray-800 font-medium py-3 rounded-xl transition-all shadow-sm"
+            >
               Thêm vào giỏ
             </button>
           </div>
@@ -235,26 +281,36 @@ export default function ProductDetailPage() {
         <h2 className="font-semibold text-gray-800 mb-4 text-xl">
           Sản phẩm liên quan
         </h2>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-          {testProducts.slice(0, 4).map((p) => (
-            <Link
-              key={p.id}
-              to={`/san-pham/${p.id}`}
-              className="bg-white p-4 rounded-2xl border border-gray-100 shadow hover:shadow-lg transition transform hover:-translate-y-1"
-            >
-              <img
-                src={p.image}
-                alt={p.name}
-                className="object-contain h-44 w-full mb-3 rounded-xl"
-              />
-              <p className="text-gray-800 font-medium text-sm line-clamp-2 mb-1">
-                {p.name}
-              </p>
-              <p className="text-red-600 font-bold text-lg">
-                {p.salePrice.toLocaleString()}₫
-              </p>
-            </Link>
-          ))}
+          {categoryProducts
+            ?.filter((p) => p.Id !== Number(id))
+            .slice(0, 4)
+            .map((p) => {
+              const image = p.AnhSanPhams?.[0]?.Url;
+
+              return (
+                <Link
+                  key={p.Id}
+                  to={`/san-pham/${p.Id}`}
+                  className="bg-white p-4 rounded-2xl border border-gray-100 shadow hover:shadow-lg transition transform hover:-translate-y-1"
+                >
+                  <img
+                    src={image || "/no-image.png"}
+                    alt={p.Ten}
+                    className="object-contain h-44 w-full mb-3 rounded-xl"
+                  />
+
+                  <p className="text-gray-800 font-medium text-sm line-clamp-2 mb-1">
+                    {p.Ten}
+                  </p>
+
+                  <p className="text-red-600 font-bold text-lg">
+                    {Number(p.Gia).toLocaleString()}₫
+                  </p>
+                </Link>
+              );
+            })}
         </div>
       </div>
     </div>

@@ -9,9 +9,7 @@ export const InventoryProvider = ({ children }) => {
   const [inventories, setInventories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // =======================
-  // LẤY TỒN KHO
-  // =======================
+
   const fetchInventories = async () => {
     setLoading(true);
     try {
@@ -30,16 +28,12 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // =======================
-  // 🔥 CHỈ LẤY TỒN KHO TỔNG CÓ HÀNG
-  // =======================
+
   const khoTongInventories = inventories.filter(
     (i) => i.KhoTongId && Number(i.SoLuong) > 0
   );
 
-  // =======================
   // KIỂM KÊ
-  // =======================
   const updateSoLuongThucTe = (id, value) => {
     setInventories((prev) =>
       prev.map((i) =>

@@ -14,9 +14,17 @@ module.exports = (sequelize, DataTypes) => {
       Ma: { type: DataTypes.STRING(100), allowNull: true, unique: true },
       KhachHangId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
       ChiNhanhId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      TinhThanh: { type: DataTypes.STRING(100), allowNull: true },
+      QuanHuyen: { type: DataTypes.STRING(100), allowNull: true },
+      XaPhuong: { type: DataTypes.STRING(100), allowNull: true },
+      DiaChiChiTiet: { type: DataTypes.STRING(500), allowNull: true },
+      MoTa: { type: DataTypes.TEXT, allowNull: true },
       NhanVienId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+      // 
       DiaChiGiao: { type: DataTypes.STRING(500), allowNull: true },
+      
       TongTien: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
+      // 
       PhiVanChuyen: { type: DataTypes.DECIMAL(15, 2), defaultValue: 0 },
       PhuongThucThanhToan: { type: DataTypes.STRING(100), allowNull: true },
       TrangThai: {

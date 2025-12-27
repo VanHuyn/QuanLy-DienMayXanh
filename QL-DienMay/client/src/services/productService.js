@@ -12,7 +12,22 @@ const productService = {
     const res = await axios.get(`${API_URL}/${id}`);
     return res.data;
   },
-
+  getByCategory: async (categoryId, branchId) => {
+    const res = await axios.get(
+      `${API_URL}/by-category/${categoryId}`,
+      {
+        params: { branchId },
+      }
+    );
+    return res.data;
+  },
+   getByCategorySlug: async (slug, branchId) => {
+    const res = await axios.get(
+      `${API_URL}/by-category-slug/${slug}`,
+      { params: { branchId } }
+    );
+    return res.data;
+  },
   create: async (data) => {
     const res = await axios.post(API_URL, data, {
       headers: {
