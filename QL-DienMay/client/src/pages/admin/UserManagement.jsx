@@ -15,15 +15,17 @@ export default function UserManagement() {
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false); // ⬅ form ẩn/hiện
 
-  const emptyForm = {
-    Id: "",
-    HoTen: "",
-    Email: "",
-    MatKhau: "",
-    SoDienThoai: "",
-    DiaChi: "",
-    VaiTroId: "",
-  };
+const emptyForm = {
+  Id: "",
+  HoTen: "",
+  Email: "",
+  MatKhau: "",
+  SoDienThoai: "",
+  DiaChi: "",
+  VaiTroId: "",
+  ChiNhanhId: "",
+};
+
 
   const [form, setForm] = useState(emptyForm);
   const [isEdit, setIsEdit] = useState(false);
@@ -64,11 +66,21 @@ export default function UserManagement() {
   };
 
   // BẤM SỬA
-  const handleEdit = (acc) => {
-    setForm({ ...acc, MatKhau: "" });
-    setIsEdit(true);
-    setShowForm(true); // ⬅ mở form
-  };
+  const handleEdit = (account) => {
+  setForm({
+    Id: account.Id,
+    HoTen: account.HoTen,
+    Email: account.Email,
+    SoDienThoai: account.SoDienThoai,
+    DiaChi: account.DiaChi,
+    VaiTroId: account.VaiTroId,
+    ChiNhanhId: account.NhanVien?.ChiNhanhId || "",
+    MatKhau: "",
+  });
+
+  setIsEdit(true);
+  setShowForm(true);
+};
 
   // BẤM THÊM MỚI
   const handleAdd = () => {

@@ -1,9 +1,40 @@
-const { TonKho, sequelize } = require("../models");
+const { TonKho, sequelize, khoChiNhanh } = require("../models");
 
 const InventoryService = {
   getAll: async () => {
     return await TonKho.findAll({
       include: [
+        {
+          association: "BienThe",
+          include: [
+            {
+              association: "SanPham",
+              include: [
+                {
+                  association: "AnhSanPhams",
+                  required: false,
+                  separate: true,
+                  order: [
+                    ["LaChinh", "DESC"],
+                    ["createdAt", "ASC"],
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        "KhoTong",
+        "KhoChiNhanh",
+      ],
+      order: [["updatedAt", "DESC"]],
+    });
+  },
+getByKhoChiNhanh: async (khoChiNhanhId) => {
+  return await TonKho.findAll({
+    where: {
+      KhoChiNhanhId: khoChiNhanhId,
+    },
+    include: [
       {
         association: "BienThe",
         include: [
@@ -13,22 +44,19 @@ const InventoryService = {
               {
                 association: "AnhSanPhams",
                 required: false,
-                separate: true,
-                order: [
-                  ["LaChinh", "DESC"],
-                  ["createdAt", "ASC"],
-                ],
               },
             ],
           },
         ],
       },
-      "KhoTong",
-      "KhoChiNhanh",
+      {
+        association: "KhoChiNhanh",
+      },
     ],
-      order: [["updatedAt", "DESC"]],
-    });
-  },
+    order: [["updatedAt", "DESC"]],
+  });
+},
+
 
   exportFromKhoTongToChiNhanh: async ({
     BienTheSanPhamId,

@@ -1,26 +1,41 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
-
+import { useUsers } from "../../context/UserContext";
+import toast from "react-hot-toast";
 export default function ProfilePage() {
-  const { user } = useContext(AuthContext);
-
+  const { user, token, setUser } = useContext(AuthContext);
+  const { updateProfile } = useUsers();
   const initialForm = {
     HoTen: user?.HoTen || "",
     Email: user?.Email || "",
     SoDienThoai: user?.SoDienThoai || "",
     DiaChi: user?.DiaChi || "",
   };
-
+  console.log(user, token, setUser);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState(initialForm);
+  useEffect(() => {
+    setForm({
+      HoTen: user?.HoTen || "",
+      Email: user?.Email || "",
+      SoDienThoai: user?.SoDienThoai || "",
+      DiaChi: user?.DiaChi || "",
+    });
+  }, [user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    console.log("Save profile", form);
+  const handleSave = async () => {
+    const payload = {
+      HoTen: form.HoTen,
+      SoDienThoai: form.SoDienThoai,
+      DiaChi: form.DiaChi,
+    };
+
+    await updateProfile(payload, token, setUser);
     setEditMode(false);
   };
 
@@ -29,8 +44,12 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800">Thông tin cá nhân</h1>
-          <p className="text-gray-600 mt-2">Quản lý thông tin tài khoản của bạn</p>
+          <h1 className="text-4xl font-bold text-gray-800">
+            Thông tin cá nhân
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Quản lý thông tin tài khoản của bạn
+          </p>
         </div>
 
         {/* Card */}
@@ -65,7 +84,9 @@ export default function ProfilePage() {
                     className="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 ) : (
-                  <p className="mt-1 text-gray-800 font-semibold">{form.HoTen}</p>
+                  <p className="mt-1 text-gray-800 font-semibold">
+                    {form.HoTen}
+                  </p>
                 )}
               </div>
             </div>
@@ -75,11 +96,10 @@ export default function ProfilePage() {
                 <label className="text-gray-500 font-medium">Email</label>
                 {editMode ? (
                   <input
+                    disabled
                     type="email"
-                    name="Email"
                     value={form.Email}
-                    onChange={handleChange}
-                    className="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="mt-1 w-full bg-gray-100 border border-gray-300 rounded-lg p-2 cursor-not-allowed"
                   />
                 ) : (
                   <p className="mt-1 text-gray-800">{form.Email}</p>
@@ -91,7 +111,9 @@ export default function ProfilePage() {
             <div className="flex items-center gap-4">
               <FaPhone className="text-blue-500 text-2xl shrink-0" />
               <div className="flex-1 flex flex-col">
-                <label className="text-gray-500 font-medium">Số điện thoại</label>
+                <label className="text-gray-500 font-medium">
+                  Số điện thoại
+                </label>
                 {editMode ? (
                   <input
                     type="text"
@@ -120,7 +142,9 @@ export default function ProfilePage() {
                     className="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 ) : (
-                  <p className="mt-1 text-gray-800">{form.DiaChi || "Chưa cập nhật"}</p>
+                  <p className="mt-1 text-gray-800">
+                    {form.DiaChi || "Chưa cập nhật"}
+                  </p>
                 )}
               </div>
             </div>

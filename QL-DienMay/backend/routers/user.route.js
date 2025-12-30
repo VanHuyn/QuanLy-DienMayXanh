@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user.controller");
-
+const auth = require("../middleware/auth");
 // CREATE
 router.post("/", userController.create);
 
@@ -9,7 +9,9 @@ router.post("/", userController.create);
 router.get("/", userController.getAll);
 
 // GET USER BY ID
+router.put("/me", auth, userController.updateMe);
 router.get("/:id", userController.getById);
+router.get("/branch/:chiNhanhId", userController.getByBranch);
 
 // UPDATE USER
 router.put("/:id", userController.update);

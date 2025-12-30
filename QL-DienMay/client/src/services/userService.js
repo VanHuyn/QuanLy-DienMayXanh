@@ -1,10 +1,11 @@
 const API_URL = "http://localhost:5000/api/v1/users";
+import axios from "axios";
 
 const userService = {
   getAll: async () => {
     const res = await fetch(API_URL);
-      const json = await res.json();
-    return json.data || []; 
+    const json = await res.json();
+    return json.data || [];
   },
 
   getById: async (id) => {
@@ -19,6 +20,11 @@ const userService = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+  getByBranch: async (chiNhanhId) => {
+    const res = await fetch(`${API_URL}/branch/${chiNhanhId}`);
+    const json = await res.json();
+    return json.data || [];
   },
 
   update: async (id, data) => {
@@ -35,6 +41,12 @@ const userService = {
       method: "DELETE",
     });
     return res.json();
+  },
+  updateMe: async (data) => {
+    const res = await axios.put(`${API_URL}/me`, data, {
+      withCredentials: true,
+    });
+    return res.data;
   },
 };
 

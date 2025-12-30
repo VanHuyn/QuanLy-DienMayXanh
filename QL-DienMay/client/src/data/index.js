@@ -624,7 +624,11 @@ export const menuAdmin = [
   // ncc
   { path: "/admin/suppliers", label: "Nhà cung cấp (NCC)", icon: Truck },
   { path: "/admin/branchs", label: "Quản lý chi nhánh", icon: Truck },
-  { path: "/admin/branch-warehouses", label: "Quản lý kho chi nhánh", icon: Truck },
+  {
+    path: "/admin/branch-warehouses",
+    label: "Quản lý kho chi nhánh",
+    icon: Truck,
+  },
   {
     path: "/admin/supplier-imports",
     label: "Phiếu nhập từ NCC",
@@ -638,6 +642,7 @@ export const menuAdmin = [
     label: "Kiểm kê & điều chỉnh",
     icon: ClipboardCheck,
   },
+  { path: "/admin/order", label: "Đơn hàng", icon: FileMinus },
 
   // Luồng kho
   { path: "/admin/exports", label: "Xuất kho cho chi nhánh", icon: FileMinus },
@@ -645,28 +650,56 @@ export const menuAdmin = [
 
   // Hệ thống thống kê lớn
   { path: "/admin/statistics", label: "Thống kê hệ thống", icon: BarChart4 },
-  { path: "/admin/inventory", label: "Tồn kho toàn hệ thống", icon: Boxes },
   // Cấu hình
   { path: "/admin/settings", label: "Cài đặt hệ thống", icon: Settings },
 ];
 // quản lý chi nhánh
 export const menuBranchManager = [
-  { path: "/branch/dashboard", label: "Tổng quan chi nhánh", icon: Home },
-  { path: "/branch/revenue", label: "Doanh thu", icon: BarChart },
-  { path: "/branch/inventory", label: "Tồn kho", icon: Boxes },
-  { path: "/branch/top-products", label: "Sản phẩm bán chạy", icon: Star },
-  { path: "/branch/staff", label: "Quản lý nhân viên", icon: Users },
-  { path: "/branch/orders", label: "Hóa đơn & giao dịch", icon: FileText },
   {
-    path: "/branch/reviews",
+    path: "/manager/dashboard",
+    label: "Tổng quan chi nhánh",
+    icon: Home, // tổng hợp nhanh: doanh thu, tồn kho, đơn hàng
+  },
+  {
+    path: "/manager/staff",
+    label: "Quản lý nhân viên",
+    icon: Users,
+  },
+  {
+    path: "/manager/inventory",
+    label: "Tồn kho chi nhánh",
+    icon: Boxes,
+  },
+  {
+    path: "/manager/request-import",
+    label: "Nhập hàng",
+    icon: Truck,
+  },
+  {
+    path: "/manager/revenue",
+    label: "Doanh thu chi nhánh",
+    icon: BarChart,
+  },
+  {
+    path: "/manager/top-products",
+    label: "Hàng bán chạy",
+    icon: Star,
+  },
+  {
+    path: "/manager/orders",
+    label: "Hóa đơn & lợi nhuận",
+    icon: FileText, // hóa đơn + lợi nhuận + chi phí
+  },
+  {
+    path: "/manager/reviews",
     label: "Đánh giá khách hàng",
     icon: MessageSquare,
   },
-  { path: "/branch/request-import", label: "Yêu cầu nhập hàng", icon: Truck },
 ];
+
 // nhân viên kho tổng
 export const menuCentralWarehouse = [
-  { path: "/warehouse/dashboard", label: "Kho tổng", icon: Warehouse },
+  { path: "/warehouse/dashboard", label: "Dashboard", icon: Warehouse },
   { path: "/warehouse/import", label: "Nhập hàng từ NCC", icon: LogIn },
   {
     path: "/warehouse/distribution",
@@ -674,40 +707,40 @@ export const menuCentralWarehouse = [
     icon: Share2,
   },
   { path: "/warehouse/stock", label: "Tồn kho tổng", icon: Boxes },
-  { path: "/warehouse/history", label: "Lịch sử nhập/xuất", icon: History },
-  { path: "/warehouse/returns", label: "Hàng lỗi / trả về", icon: RotateCcw },
+  // { path: "/warehouse/history", label: "Lịch sử nhập/xuất", icon: History },
+  // { path: "/warehouse/returns", label: "Hàng lỗi / trả về", icon: RotateCcw },
 ];
 // kho chi nhánh
-export const menuBranchWarehouse = [
-  { path: "/branch-warehouse/dashboard", label: "Kho chi nhánh", icon: Home },
+export const warehousebranch = [
+  { path: "/warehousebranch/dashboard", label: "Dashboard", icon: Home },
+  { path: "/warehousebranch/stock", label: "Tồn kho chi nhánh", icon: Boxes },
   {
-    path: "/branch-warehouse/receive",
+    path: "/warehousebranch/receive",
     label: "Nhận hàng từ kho tổng",
     icon: LogIn,
   },
   {
-    path: "/branch-warehouse/transfer",
+    path: "/warehousebranch/transfer",
     label: "Điều chuyển chi nhánh",
     icon: Shuffle,
   },
-  { path: "/branch-warehouse/stock", label: "Tồn kho chi nhánh", icon: Boxes },
   {
-    path: "/branch-warehouse/check",
+    path: "/warehousebranch/check",
     label: "Kiểm kê kho",
     icon: ClipboardCheck,
   },
   {
-    path: "/branch-warehouse/out",
+    path: "/warehousebranch/out",
     label: "Xuất hàng cho bán hàng",
     icon: LogOut,
   },
 ];
 // nhân viên bán hàng
 export const menuSalesStaff = [
-  { path: "/sales/dashboard", label: "Bán hàng", icon: ShoppingCart },
-  { path: "/sales/invoice", label: "Hóa đơn bán hàng", icon: FileText },
-  { path: "/sales/orders", label: "Xử lý đơn online", icon: PackageCheck },
-  { path: "/sales/support", label: "Tư vấn & hỗ trợ", icon: MessageSquare },
-  { path: "/sales/exchange", label: "Đổi trả / bảo hành", icon: RotateCcw },
-  { path: "/sales/history", label: "Lịch sử giao dịch", icon: History },
+  { path: "/staff/dashboard", label: "Bán hàng", icon: ShoppingCart },
+  { path: "/staff/invoice", label: "Hóa đơn bán hàng", icon: FileText },
+  { path: "/staff/orders", label: "Xử lý đơn online", icon: PackageCheck },
+  { path: "/staff/support", label: "Tư vấn & hỗ trợ", icon: MessageSquare },
+  { path: "/staff/exchange", label: "Đổi trả / bảo hành", icon: RotateCcw },
+  { path: "/staff/history", label: "Lịch sử giao dịch", icon: History },
 ];

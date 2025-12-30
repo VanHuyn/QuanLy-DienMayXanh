@@ -50,6 +50,32 @@ export const UserProvider = ({ children }) => {
       toast.error(err.message);
     }
   };
+  const fetchUsersByBranch = async (chiNhanhId) => {
+    try {
+      setLoading(true);
+      const data = await userService.getByBranch(chiNhanhId);
+      setUsers(data);
+    } catch (err) {
+      toast.error("Không thể tải nhân viên theo chi nhánh");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const updateProfile = async (data) => {
+    try {
+      const res = await userService.updateMe(data); // axios với cookie
+      if (res.success) {
+        // cập nhật AuthContext
+        setUsers(res.data); // ✅ state mới
+        localStorage.setItem("user", JSON.stringify(res.data)); // ✅ lưu lại localStorage
+        toast.success(res.message || "Cập nhật thành công");
+      } else {
+        toast.error(res.message || "Cập nhật thất bại");
+      }
+    } catch (err) {
+      toast.error("Không thể cập nhật thông tin");
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -63,6 +89,8 @@ export const UserProvider = ({ children }) => {
         createUser,
         updateUser,
         deleteUser,
+        fetchUsersByBranch,
+        updateProfile,
       }}
     >
       {children}

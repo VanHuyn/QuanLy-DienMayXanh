@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import { useCart } from "../../context/CartContext";
 import { useOrder } from "../../context/OrderContext";
 import Meta from "../../components/Meta";
@@ -6,15 +6,19 @@ import { FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 import { useBranches } from "../../context/BranchContext";
-
+import { usePromotion } from "../../context/PromotionContext";
+import { useNavigate } from "react-router-dom";
 export default function CheckoutPage() {
+  const navigate = useNavigate();
   const { cart, updateItem, removeItem, clearCart } = useCart();
-    const {  selectedBranch } = useBranches();
-  
-  const { placeOrder } = useOrder();
-  const { user } = useContext(AuthContext);
-  console.log("user.Id:", selectedBranch);
+  const { selectedBranch } = useBranches();
+  const { checkPromotionCode, loading, promotions } = usePromotion();
+  const [promotionCode, setPromotionCode] = useState("");
+  const [appliedPromotion, setAppliedPromotion] = useState(null);
+  const [showPromotions, setShowPromotions] = useState(false);
 
+  const { placeOrder, payWithMomo } = useOrder();
+  const { user } = useContext(AuthContext);
   const [localCart, setLocalCart] = useState([]);
   const [orderInfo, setOrderInfo] = useState({
     TinhThanh: "",
@@ -24,10 +28,22 @@ export default function CheckoutPage() {
     MoTa: "",
     PhuongThucThanhToan: "cod",
   });
-
+  console.log(user)
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const handleApplyPromotion = async () => {
+    if (!promotionCode.trim()) {
+      toast.error("Vui lòng nhập mã khuyến mãi");
+      return;
+    }
+
+    const promo = await checkPromotionCode(promotionCode.trim());
+
+    if (promo) {
+      setAppliedPromotion(promo);
+    }
+  };
 
   useEffect(() => {
     if (cart?.ChiTietGioHangs) setLocalCart(cart.ChiTietGioHangs);
@@ -84,10 +100,28 @@ export default function CheckoutPage() {
     await clearCart();
   };
 
-  const totalPrice = localCart.reduce(
-    (sum, item) => sum + Number(item.BienTheSanPham.Gia) * item.SoLuong,
-    0
-  );
+  const subtotal = useMemo(() => {
+    return localCart.reduce((sum, item) => {
+      const product = item.BienTheSanPham;
+      const price =
+        product.GiaKhuyenMai && product.GiaKhuyenMai > 0
+          ? Number(product.GiaKhuyenMai)
+          : Number(product.Gia);
+      return sum + price * item.SoLuong;
+    }, 0);
+  }, [localCart]);
+
+  const discountPercent = useMemo(() => {
+    return appliedPromotion ? Number(appliedPromotion.PhanTramGiam) : 0;
+  }, [appliedPromotion]);
+
+  const discountAmount = useMemo(() => {
+    return (subtotal * discountPercent) / 100;
+  }, [subtotal, discountPercent]);
+
+  const totalPrice = useMemo(() => {
+    return subtotal - discountAmount;
+  }, [subtotal, discountAmount]);
 
   const handleSubmitOrder = async () => {
     if (!user) {
@@ -100,25 +134,55 @@ export default function CheckoutPage() {
     }
 
     const orderData = {
-      KhachHangId: user?.KhachHang?.Id,
-       ChiNhanhId: selectedBranch?.Id, 
+      DonHangId: Date.now(), // ID tạm thời để MoMo nhận biết
+      TongTien: totalPrice,
+      KhachHangId: user?.Id,
+      customer: { KhachHangId: user?.Id },
+      ChiNhanhId: selectedBranch?.Id,
+      MoTa: orderInfo.MoTa,
       TinhThanh: orderInfo.TinhThanh,
       QuanHuyen: orderInfo.QuanHuyen,
       XaPhuong: orderInfo.XaPhuong,
       DiaChiChiTiet: orderInfo.DiaChiChiTiet,
-      MoTa: orderInfo.MoTa,
-      TongTien: totalPrice,
-      PhuongThucThanhToan: orderInfo.PhuongThucThanhToan,
-      items: localCart.map((item) => ({
-        bienTheSanPhamId: item.BienTheSanPham.Id,
-        soLuong: item.SoLuong,
+      products: localCart.map((item) => ({
+        BienTheSanPhamId: item.BienTheSanPham.Id,
+        SoLuong: item.SoLuong,
       })),
     };
-
     try {
-      const res = await placeOrder(orderData);
-      await clearCart();
-      setLocalCart([]);
+      if (orderInfo.PhuongThucThanhToan === "cod") {
+        const res = await placeOrder({
+          ...orderData,
+          PhuongThucThanhToan: "cod",
+          ChiNhanhId: selectedBranch?.Id,
+          items: localCart.map((item) => ({
+            bienTheSanPhamId: item.BienTheSanPham.Id,
+            soLuong: item.SoLuong,
+          })),
+        });
+        setLocalCart([]);
+        navigate("/thanh-toan-thanh-cong");
+      } else if (orderInfo.PhuongThucThanhToan === "momo") {
+        await payWithMomo({
+          DonHangId: Date.now(),
+          TongTien: totalPrice,
+          customer: { KhachHangId: user.Id },
+          ChiNhanhId: selectedBranch.Id,
+          TinhThanh: orderInfo.TinhThanh,
+          QuanHuyen: orderInfo.QuanHuyen,
+          XaPhuong: orderInfo.XaPhuong,
+          DiaChiChiTiet: orderInfo.DiaChiChiTiet,
+          products: localCart.map((item) => ({
+            BienTheSanPhamId: item.BienTheSanPham.Id,
+            SoLuong: item.SoLuong,
+          })),
+        });
+        if (res.success && res.payUrl) {
+          window.location.href = res.payUrl; // redirect sang MoMo
+        } else {
+          toast.error("Không tạo được link thanh toán Momo");
+        }
+      }
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Đặt hàng thất bại!");
@@ -154,20 +218,26 @@ export default function CheckoutPage() {
               {user?.SoDienThoai || "-"}
             </p>
           </div>
-
+    
           <div className="flex flex-col gap-3">
             <select
               name="TinhThanh"
               value={orderInfo.TinhThanh}
               onChange={(e) => {
-                handleChange(e);
-                fetchDistricts(e.target.value);
+                const code = e.target.selectedOptions[0].dataset.code;
+                setOrderInfo((prev) => ({
+                  ...prev,
+                  TinhThanh: e.target.value,
+                  QuanHuyen: "",
+                  XaPhuong: "",
+                }));
+                fetchDistricts(code);
               }}
               className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
             >
               <option value="">Chọn tỉnh/thành</option>
               {provinces.map((p) => (
-                <option key={p.code} value={p.code}>
+                <option key={p.code} value={p.name} data-code={p.code}>
                   {p.name}
                 </option>
               ))}
@@ -177,14 +247,19 @@ export default function CheckoutPage() {
               name="QuanHuyen"
               value={orderInfo.QuanHuyen}
               onChange={(e) => {
-                handleChange(e);
-                fetchWards(e.target.value);
+                const code = e.target.selectedOptions[0].dataset.code;
+                setOrderInfo((prev) => ({
+                  ...prev,
+                  QuanHuyen: e.target.value,
+                  XaPhuong: "",
+                }));
+                fetchWards(code);
               }}
               className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
             >
               <option value="">Chọn quận/huyện</option>
               {districts.map((d) => (
-                <option key={d.code} value={d.code}>
+                <option key={d.code} value={d.name} data-code={d.code}>
                   {d.name}
                 </option>
               ))}
@@ -193,12 +268,17 @@ export default function CheckoutPage() {
             <select
               name="XaPhuong"
               value={orderInfo.XaPhuong}
-              onChange={handleChange}
+              onChange={(e) =>
+                setOrderInfo((prev) => ({
+                  ...prev,
+                  XaPhuong: e.target.value,
+                }))
+              }
               className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
             >
               <option value="">Chọn xã/phường</option>
               {wards.map((w) => (
-                <option key={w.code} value={w.code}>
+                <option key={w.code} value={w.name}>
                   {w.name}
                 </option>
               ))}
@@ -220,6 +300,32 @@ export default function CheckoutPage() {
               onChange={handleChange}
               className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
             />
+
+
+            {/* Mã khuyến mãi */}
+            <div className="flex gap-2 mt-3">
+              <input
+                type="text"
+                placeholder="Nhập mã khuyến mãi"
+                value={promotionCode}
+                onChange={(e) => setPromotionCode(e.target.value)}
+                className="flex-1 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+              <button
+                onClick={handleApplyPromotion}
+                disabled={loading}
+                className="px-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-semibold disabled:opacity-50"
+              >
+                Áp dụng
+              </button>
+            </div>
+
+            {appliedPromotion && (
+              <p className="text-green-600 text-sm mt-1">
+                Đã áp dụng mã <b>{appliedPromotion.Ma}</b> (-
+                {appliedPromotion.PhanTramGiam}%)
+              </p>
+            )}
 
             <div className="flex gap-4 mt-2">
               <label className="flex items-center gap-2">
@@ -246,11 +352,23 @@ export default function CheckoutPage() {
               </label>
             </div>
 
-            <div className="border-t pt-4 flex justify-between text-lg font-semibold">
-              <span>Tổng tiền:</span>
-              <span className="text-red-600">
-                {totalPrice.toLocaleString()}₫
-              </span>
+            <div className="border-t pt-4 text-lg">
+              <div className="flex justify-between">
+                <span>Tạm tính:</span>
+                <span>{subtotal.toLocaleString()}₫</span>
+              </div>
+
+              {appliedPromotion && (
+                <div className="flex justify-between text-green-600">
+                  <span>Giảm giá:</span>
+                  <span>-{discountAmount.toLocaleString()}₫</span>
+                </div>
+              )}
+
+              <div className="flex justify-between font-bold text-red-600 mt-2">
+                <span>Tổng thanh toán:</span>
+                <span>{totalPrice.toLocaleString()}₫</span>
+              </div>
             </div>
 
             <button

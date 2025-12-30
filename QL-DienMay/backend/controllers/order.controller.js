@@ -13,7 +13,7 @@ class OrderController {
         PhuongThucThanhToan,
         items,
         TongTien,
-        ChiNhanhId
+        ChiNhanhId,
       } = req.body;
       const donHang = await OrderService.createOrder({
         KhachHangId,
@@ -25,7 +25,7 @@ class OrderController {
         PhuongThucThanhToan,
         items,
         TongTien,
-        ChiNhanhId
+        ChiNhanhId,
       });
 
       res.status(201).json({ success: true, data: donHang });
@@ -39,6 +39,48 @@ class OrderController {
       const { khachHangId } = req.params;
       const orders = await OrderService.getOrdersByCustomer(khachHangId);
       res.json({ success: true, data: orders });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+  static async getAllOrders(req, res) {
+    try {
+      const { trangThai } = req.query; // có thể lọc trạng thái
+      const orders = await OrderService.getAllOrders(trangThai);
+      res.json({ success: true, data: orders });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  // Lấy chi tiết đơn hàng (admin)
+  static async getOrderDetail(req, res) {
+    try {
+      const { id } = req.params;
+      const order = await OrderService.getOrderDetail(id);
+      if (!order)
+        return res
+          .status(404)
+          .json({ success: false, message: "Đơn hàng không tồn tại" });
+      res.json({ success: true, data: order });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  // Cập nhật trạng thái đơn hàng
+  static async updateOrderStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { TrangThai } = req.body;
+      console.log(TrangThai);
+      if (!TrangThai)
+        return res
+          .status(400)
+          .json({ success: false, message: "Thiếu trạng thái mới" });
+
+      const updated = await OrderService.updateOrderStatus(id, TrangThai);
+      res.json({ success: true, data: updated });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }

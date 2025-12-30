@@ -12,13 +12,18 @@ module.exports = (sequelize, DataTypes) => {
     Email: { type: DataTypes.STRING(200), allowNull: true },
   }, { tableName: 'ChiNhanh', timestamps: true });
 
-  // Thiết lập quan hệ (nếu models khác đã được đăng ký trong sequelize.models)
-  const models = sequelize.models;
-  try {
-    if (models.NhanVien) ChiNhanh.hasMany(models.NhanVien, { foreignKey: 'ChiNhanhId', as: 'NhanViens' });
-  } catch (e) {
-    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
-  }
+  ChiNhanh.associate = (models) => {
+    ChiNhanh.hasMany(models.NhanVien, {
+      foreignKey: "ChiNhanhId",
+      as: "NhanViens",
+    });
+
+    // ⭐ DÒNG QUAN TRỌNG NHẤT
+    ChiNhanh.hasOne(models.KhoChiNhanh, {
+      foreignKey: "ChiNhanhId",
+      as: "KhoChiNhanh",
+    });
+  };
 
   return ChiNhanh;
 };

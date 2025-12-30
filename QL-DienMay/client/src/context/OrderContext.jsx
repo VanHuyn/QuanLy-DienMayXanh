@@ -9,16 +9,19 @@ export const useOrder = () => useContext(OrderContext);
 export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [adminOrders, setAdminOrders] = useState([]);
   const { user } = useAuth();
-  console.log(user);
+  console.log("aaa ",user)
+  // ---------------- Khách hàng ----------------
   const fetchOrders = async () => {
-    if (!user?.KhachHang?.Id) {
+    if (!user?.Id) {
       setOrders([]);
       return;
     }
     try {
+      console.log("user.KhachHang.Id ",user.Id)
       setLoading(true);
-      const res = await orderService.getCustomerOrders(user.KhachHang.Id);
+      const res = await orderService.getCustomerOrders(user?.Id);
       setOrders(res.data || []);
     } catch (err) {
       toast.error("Không thể tải đơn hàng");
@@ -26,7 +29,20 @@ export const OrderProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
+  const payWithMomo = async (orderData) => {
+  try {
+    const res = await orderService.payWithMomo(orderData);
+    if (res.success && res.payUrl) {
+      window.location.href = res.payUrl;
+    } else {
+      toast.error("Không tạo được link thanh toán MoMo");
+    }
+  } catch (err) {
+    console.error("Lỗi thanh toán MoMo:", err);
+    toast.error(err.response?.data?.message || "Lỗi khi thanh toán MoMo");
+    throw err;
+  }
+};
   const placeOrder = async (data) => {
     try {
       const res = await orderService.placeOrder(data);
@@ -39,13 +55,59 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
+  // ---------------- Admin ----------------
+  const fetchAllOrders = async () => {
+    try {
+      setLoading(true);
+      const res = await orderService.getAllOrders();
+      setAdminOrders(res.data || []);
+    } catch (err) {
+      toast.error("Không thể tải danh sách đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOrderDetail = async (orderId) => {
+    try {
+      setLoading(true);
+      const res = await orderService.getOrderDetail(orderId);
+      return res.data;
+    } catch (err) {
+      toast.error("Không thể tải chi tiết đơn hàng");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // OrderContext.js
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const res = await orderService.updateOrderStatus(orderId, {
+        TrangThai: newStatus,
+      });
+      toast.success("Cập nhật trạng thái thành công");
+      fetchAllOrders();
+      return res.data;
+    } catch (err) {
+      toast.error("Cập nhật trạng thái thất bại");
+      throw err;
+    }
+  };
+
   return (
     <OrderContext.Provider
       value={{
         orders,
+        adminOrders,
         loading,
         fetchOrders,
         placeOrder,
+        fetchAllOrders,
+        fetchOrderDetail,
+        updateOrderStatus,
+        payWithMomo
       }}
     >
       {children}

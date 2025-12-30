@@ -10,24 +10,24 @@ const inventoryService = {
     });
     return res.data;
   },
-
-  // Kiểm kê & điều chỉnh tồn kho
-  adjustInventory: async (data) => {
-    const res = await axios.post(
-      `${API_URL}-check`,
-      data,
-      { withCredentials: true }
-    );
+  getMyBranchInventories: async () => {
+    const res = await axios.get(`${API_URL}/my-branch`, {
+      withCredentials: true,
+    });
     return res.data;
   },
 
-  // 🔥 XUẤT KHO CHO CHI NHÁNH
+  adjustInventory: async (data) => {
+    const res = await axios.post(`${API_URL}-check`, data, {
+      withCredentials: true,
+    });
+    return res.data;
+  },
+
   exportToBranch: async (data) => {
-    const res = await axios.post(
-      `${API_URL}/export-kho-tong`,
-      data,
-      { withCredentials: true }
-    );
+    const res = await axios.post(`${API_URL}/export-kho-tong`, data, {
+      withCredentials: true,
+    });
     return res.data;
   },
 };

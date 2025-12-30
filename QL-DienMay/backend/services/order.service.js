@@ -2,10 +2,14 @@ const {
   DonHang,
   ChiTietDonHang,
   BienTheSanPham,
-  KhachHang,
-  SanPham,
   TonKho,
+  PhieuBaoHanh,
+  PhieuDoiTra,
+  KhachHang,
+  PhieuThanhToan,
+  SanPham,
   AnhSanPham,
+  NguoiDung,
   KhoChiNhanh,
 } = require("../models");
 
@@ -20,17 +24,22 @@ class OrderService {
     MoTa,
     PhuongThucThanhToan,
     TongTien,
-    ChiNhanhId, // đây là id của ChiNhanh
+    ChiNhanhId,
   }) {
     if (!items || !items.length) throw new Error("Danh sách sản phẩm trống");
     if (!ChiNhanhId) throw new Error("Chi nhánh chưa được chọn");
 
-    // Tìm kho chi nhánh tương ứng
     const khoChiNhanh = await KhoChiNhanh.findOne({ where: { ChiNhanhId } });
     if (!khoChiNhanh) throw new Error("Chi nhánh chưa có kho");
-
+    let khachHangIdThuc = KhachHangId;
+    if (KhachHangId) {
+      const khachHang = await KhachHang.findOne({
+        where: { NguoiDungId: KhachHangId },
+      });
+      if (!khachHang) throw new Error("Khách hàng không tồn tại");
+      khachHangIdThuc = khachHang.Id;
+    }
     const KhoChiNhanhId = khoChiNhanh.Id;
-
     let total = 0;
     const chiTietDonHangs = [];
 
@@ -53,9 +62,9 @@ class OrderService {
       });
     }
 
-    // 2. Tạo đơn hàng
+    // 1. Tạo đơn hàng
     const donHang = await DonHang.create({
-      KhachHangId: KhachHangId || null,
+      KhachHangId: khachHangIdThuc || null,
       TinhThanh: TinhThanh || null,
       QuanHuyen: QuanHuyen || null,
       XaPhuong: XaPhuong || null,
@@ -64,14 +73,15 @@ class OrderService {
       PhuongThucThanhToan: PhuongThucThanhToan || null,
       TongTien: TongTien || total,
       TrangThai: "ChoXacNhan",
+      ChiNhanhId: ChiNhanhId || null,
     });
 
-    // 3. Tạo chi tiết đơn hàng & trừ kho
+    // 2. Tạo chi tiết đơn hàng & trừ kho
     for (const ct of chiTietDonHangs) {
       const kho = await TonKho.findOne({
         where: {
           BienTheSanPhamId: ct.BienTheSanPhamId,
-          KhoChiNhanhId, // dùng khoChiNhanh.Id tìm kho
+          KhoChiNhanhId,
         },
       });
 
@@ -95,42 +105,173 @@ class OrderService {
         DonGia: ct.DonGia,
         ThanhTien: ct.ThanhTien,
       });
+
+      // 3. Tạo phiếu bảo hành cho từng sản phẩm nếu cần
+      await PhieuBaoHanh.create({
+        DonHangId: donHang.Id,
+        KhachHangId: khachHangIdThuc,
+        SanPhamId: ct.SanPhamId,
+        TrangThai: "Moi",
+      });
+
+      // 4. Tạo phiếu đổi trả cho từng sản phẩm (mặc định chưa xử lý)
+      await PhieuDoiTra.create({
+        DonHangId: donHang.Id,
+        KhachHangId: khachHangIdThuc,
+        LyDo: "",
+        TrangThai: "ChoXuLy",
+      });
     }
+
+    // 5. Tạo phiếu thanh toán tổng đơn
+    await PhieuThanhToan.create({
+      DonHangId: donHang.Id,
+      SoTien: TongTien || total,
+      PhuongThuc: PhuongThucThanhToan || "ChuaXacDinh",
+      TrangThai: "DangCho",
+    });
 
     return donHang;
   }
+  // Lấy tất cả đơn hàng của 1 khách hàng
+  static async getOrdersByCustomer(userId) {
+    if (!userId) throw new Error("Người dùng không xác định");
 
-  static async getOrdersByCustomer(KhachHangId) {
-    if (!KhachHangId) return [];
+    // Lấy KhachHangId từ NguoiDungId
+    const khachHang = await KhachHang.findOne({
+      where: { NguoiDungId: userId },
+    });
+    if (!khachHang) throw new Error("Khách hàng không tồn tại");
+
+    console.log("KhachHangId:", khachHang.Id);
 
     return DonHang.findAll({
-      where: { KhachHangId },
+      where: { KhachHangId: khachHang.Id },
       include: [
         {
           model: ChiTietDonHang,
           as: "ChiTietDonHangs",
-        },
-        {
-          model: BienTheSanPham,
-          as: "BienTheSanPhams",
           include: [
             {
-              model: AnhSanPham,
-              as: "AnhSanPhams",
-            },
-            {
-              model: SanPham,
-              as: "SanPham",
+              model: BienTheSanPham,
+              as: "BienTheSanPham",
               include: [
-                { model: AnhSanPham, as: "AnhSanPhams" }, // nếu muốn lấy ảnh chung của sản phẩm
+                {
+                  model: SanPham,
+                  as: "SanPham",
+                  include: [
+                    {
+                      model: AnhSanPham,
+                      as: "AnhSanPhams",
+                      where: { LaChinh: true },
+                      required: false,
+                    },
+                  ],
+                },
               ],
             },
           ],
         },
+        { model: PhieuThanhToan, as: "PhieuThanhToans" },
+        { model: PhieuBaoHanh, as: "PhieuBaoHanhs" },
+        { model: PhieuDoiTra, as: "PhieuDoiTras" },
       ],
       order: [["NgayDat", "DESC"]],
     });
   }
-}
 
+  static async getAllOrders(trangThai) {
+    const where = {};
+    if (trangThai) where.TrangThai = trangThai;
+
+    return DonHang.findAll({
+      where,
+      include: [
+        // Thông tin khách hàng
+        {
+          model: KhachHang,
+          as: "KhachHang",
+          include: [
+            {
+              model: NguoiDung,
+              as: "NguoiDung",
+              attributes: ["HoTen", "Email", "SoDienThoai"],
+            },
+          ],
+        },
+        // Chi tiết sản phẩm
+        {
+          model: ChiTietDonHang,
+          as: "ChiTietDonHangs",
+          include: [
+            {
+              model: BienTheSanPham,
+              as: "BienTheSanPham",
+              include: [
+                {
+                  model: SanPham,
+                  as: "SanPham",
+                  include: [{ model: AnhSanPham, as: "AnhSanPhams" }],
+                },
+              ],
+            },
+          ],
+        },
+        { model: PhieuThanhToan, as: "PhieuThanhToans" },
+        { model: PhieuBaoHanh, as: "PhieuBaoHanhs" },
+        { model: PhieuDoiTra, as: "PhieuDoiTras" },
+      ],
+      order: [["NgayDat", "DESC"]],
+    });
+  }
+
+  // Chi tiết 1 đơn hàng
+  static async getOrderDetail(Id) {
+    return DonHang.findOne({
+      where: { Id },
+      include: [
+        {
+          model: KhachHang,
+          as: "KhachHang",
+          include: [
+            {
+              model: NguoiDung,
+              as: "NguoiDung",
+              attributes: ["HoTen", "Email", "SoDienThoai"],
+            },
+          ],
+        },
+        {
+          model: ChiTietDonHang,
+          as: "ChiTietDonHangs",
+          include: [
+            {
+              model: BienTheSanPham,
+              as: "BienTheSanPham",
+              include: [
+                {
+                  model: SanPham,
+                  as: "SanPham",
+                  include: [{ model: AnhSanPham, as: "AnhSanPhams" }],
+                },
+              ],
+            },
+          ],
+        },
+        { model: PhieuThanhToan, as: "PhieuThanhToans" },
+        { model: PhieuBaoHanh, as: "PhieuBaoHanhs" },
+        { model: PhieuDoiTra, as: "PhieuDoiTras" },
+      ],
+    });
+  }
+
+  // Cập nhật trạng thái đơn hàng
+  static async updateOrderStatus(Id, TrangThai) {
+    const order = await DonHang.findByPk(Id);
+    if (!order) throw new Error("Đơn hàng không tồn tại");
+    order.TrangThai = TrangThai;
+    await order.save();
+    return order;
+  }
+}
 module.exports = OrderService;

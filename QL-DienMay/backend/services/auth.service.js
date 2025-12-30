@@ -1,31 +1,72 @@
 const jwt = require("jsonwebtoken");
-const { NguoiDung, VaiTro, KhachHang } = require("../models");
+const { NguoiDung, VaiTro, KhachHang ,NhanVien,ChiNhanh,KhoChiNhanh} = require("../models");
 const { comparePassword, hashPassword } = require("../utils/password");
 
 class AuthService {
-  async login(Email, MatKhau) {
-    const user = await NguoiDung.findOne({
-      where: { Email },
-      include: [
-        { model: VaiTro, as: "VaiTro" },
-        { model: KhachHang, as: "KhachHang" },
-      ],
-    });
-    if (!user) throw new Error("Sai email hoặc mật khẩu");
-    const isValid = await comparePassword(MatKhau, user.MatKhau);
-    if (!isValid) throw new Error("Sai email hoặc mật khẩu");
-    // Tạo JWT
-    const token = jwt.sign(
+async login(Email, MatKhau) {
+  const user = await NguoiDung.findOne({
+    where: { Email },
+    include: [
+      { model: VaiTro, as: "VaiTro" },
+      { model: KhachHang, as: "KhachHang" },
       {
-        userId: user.Id,
-        role: user.VaiTro.Ten,
-        khachHangId: user.KhachHang?.Id,
+        model: NhanVien,
+        as: "NhanVien",
+        include: [
+        {
+          model: ChiNhanh,
+          as: "ChiNhanh",
+          include: [
+            {
+              model: KhoChiNhanh,
+              as: "KhoChiNhanh", // hoặc KhoChiNhanh nếu 1-1
+            },
+          ],
+        },
+      ],
       },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-    return { user, token };
+    ],
+  });
+
+  if (!user) {
+    throw new Error("Sai email hoặc mật khẩu");
   }
+
+  const isValid = await comparePassword(MatKhau, user.MatKhau);
+  if (!isValid) {
+    throw new Error("Sai email hoặc mật khẩu");
+  }
+
+  const roleName = user.VaiTro?.Ten || null;
+  const chiNhanhId = user.NhanVien?.ChiNhanh?.Id || null;
+  const tenChiNhanh = user.NhanVien?.ChiNhanh?.Ten || null;
+  const token = jwt.sign(
+    {
+      userId: user.Id,
+      role: roleName,
+      khachHangId: user.KhachHang?.Id || null,
+      nhanVienId: user.NhanVien?.Id || null,
+      chiNhanhId: chiNhanhId,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  return {
+    user: {
+      Id: user.Id,
+      HoTen: user.HoTen,
+      Email: user.Email,
+      SoDienThoai: user.SoDienThoai,
+      VaiTro: user.VaiTro,
+      KhachHang: user.KhachHang,
+      NhanVien: user.NhanVien,
+      ChiNhanh: user.NhanVien?.ChiNhanh || null,
+    },
+    token,
+  };
+}
+
   async register(data) {
     const { HoTen, Email, MatKhau, SoDienThoai, DiaChi } = data;
     // 1. Kiểm tra email tồn tại

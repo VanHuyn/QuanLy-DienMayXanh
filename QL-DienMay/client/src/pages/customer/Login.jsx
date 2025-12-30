@@ -33,9 +33,21 @@ export default function Login() {
       const role = user?.VaiTro?.Ten;
 
       // Điều hướng theo vai trò
-      if (["Admin", "QuanLy", "NhanVienBanHang", "NhanVienKhoTong", "NhanVienKhoChiNhanh"].includes(role)) {
+      if (["Admin"].includes(role)) {
         navigate("/admin/dashboard");
-      } else {
+      }else if (["QuanLy"].includes(role)) {
+        navigate("/manager/dashboard");
+      }
+      else if (["NhanVienBanHang"].includes(role)) {
+        navigate("/staff/dashboard");
+      }
+      else if (["NhanVienKhoTong"].includes(role)) {
+        navigate("/warehouse/dashboard");
+      }
+      else if (["NhanVienKhoChiNhanh"].includes(role)) {
+        navigate("/warehousebranch/dashboard");
+      }
+       else {
         navigate("/");
       }
     } catch (err) {

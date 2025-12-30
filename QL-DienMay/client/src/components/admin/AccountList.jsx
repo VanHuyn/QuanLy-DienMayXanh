@@ -10,6 +10,7 @@ export default function AccountList({ accounts, roles, onEdit, onDelete }) {
             <th className="px-5 py-4">#</th>
             <th className="px-5 py-4">Họ tên</th>
             <th className="px-5 py-4">Email</th>
+            <th className="px-5 py-4">Chi nhánh</th>
             <th className="px-5 py-4">Vai trò</th>
             <th className="px-5 py-4 text-center">Hành động</th>
           </tr>
@@ -29,6 +30,10 @@ export default function AccountList({ accounts, roles, onEdit, onDelete }) {
                   {acc.HoTen}
                 </td>
                 <td className="px-5 py-4 text-gray-700">{acc.Email}</td>
+                <td className="px-5 py-4">
+                  {acc.NhanVien?.ChiNhanh?.Ten || "—"}
+                </td>
+
                 <td className="px-5 py-4 text-gray-700">
                   {acc.VaiTro?.Ten ||
                     roles?.find((r) => r.Id === acc.VaiTroId)?.Ten ||

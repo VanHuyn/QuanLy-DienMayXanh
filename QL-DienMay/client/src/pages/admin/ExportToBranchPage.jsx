@@ -14,7 +14,7 @@ export default function ExportToBranchPage() {
   };
   
   const [form, setForm] = useState(defaultForm);
-  const selectedTonKho = khoTongInventories.find(
+  const selectedTonKho = khoTongInventories?.find(
     (i) => i.BienTheSanPhamId == form.bienTheId
   );
 

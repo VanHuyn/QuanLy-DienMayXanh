@@ -21,6 +21,8 @@ const inventoryCheckRouter = require("./routers/inventoryCheck.router.js");
 const branchWarehouseRouter = require("./routers/branchWarehouse.router.js");
 const cartRouter = require("./routers/cart.router.js");
 const orderRouter = require("./routers/order.router.js");
+const paymentRouter = require("./routers/payment.routes.js");
+const khuyenMaiRouter = require("./routers/khuyenMai.route.js");
 
 
 
@@ -56,6 +58,8 @@ app.use("/api/v1/inventory-check", inventoryCheckRouter);
 // giỏ hàng
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/payment', paymentRouter);
+app.use('/api/v1/promotion', khuyenMaiRouter);
 
 
 app.use("/api/v1/uploads", express.static("uploads"));

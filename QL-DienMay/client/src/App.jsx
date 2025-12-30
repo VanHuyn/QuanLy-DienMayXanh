@@ -27,6 +27,29 @@ import ExportToBranchPage from "./pages/admin/ExportToBranchPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderHistoryPage from "./pages/customer/OrderHistoryPage";
 import ProfilePage from "./pages/customer/ProfilePage";
+import ManagerLayout from "./components/manager/ManagerLayout";
+import ManagerDashboard from "./pages/manager/ManagerDashboard";
+import BranchRevenuePage from "./pages/manager/BranchRevenuePage";
+import AdminProfile from "./pages/admin/AdminProfile";
+import ManagerProfile from "./pages/manager/ManagerProfile";
+import StaffManagement from "./pages/manager/StaffManagement";
+import InventoryManagerPage from "./pages/manager/InventoryManagerPage";
+import ExportToBranchManagerPage from "./pages/manager/ExportToBranchPageManager";
+import WarehouseLayout from "./components/warehouse/WarehouseLayout";
+import WarehouseDashboard from "./pages/warehouse/WarehouseDashboard";
+import SupplierImportManagementWarehouse from "./pages/warehouse/SupplierImportManagementWarehouse";
+import SupplierImportDetailPageWarehouse from "./pages/warehouse/SupplierImportDetailPageWarehouse";
+import WarehouseProfile from "./pages/warehouse/WarehouseProfile";
+import WarehouseBranchLayout from "./components/warehousebranch/WarehouseBranchLayout";
+import WarehouseBranchDashboard from "./pages/warehouseBranch/WarehouseBranchDashboard";
+import StaffLayout from "./components/staff/StaffLayout";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import WarehouseBranchProfile from "./pages/warehouseBranch/WarehouseBranchProfile";
+import StaffProfile from "./pages/staff/StaffProfile";
+import SearchPage from "./components/customer/SearchPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import PromotionPage from "./pages/admin/PromotionPage";
+import PaymentSuccessPage from "./pages/customer/PaymentSuccessPage";
 export default function App() {
   return (
     <div>
@@ -36,33 +59,89 @@ export default function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} />
+          <Route path="/tim-kiem" element={<SearchPage />} />
           <Route path="/san-pham/:id" element={<ProductDetailPage />} />
           <Route path="/danh-muc/:slug" element={<CategoryPage />} />
           <Route path="/gio-hang" element={<CartPage />} />
           <Route path="/dat-hang" element={<CheckoutPage />} />
           <Route path="/lich-su-don-hang" element={<OrderHistoryPage />} />
           <Route path="/thong-tin-ca-nhan" element={<ProfilePage />} />
+          <Route path="/thanh-toan-thanh-cong" element={<PaymentSuccessPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
         {/* <Route element={<ProtectedRoute allowedRoles={["admin"]} />}> */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="profile" element={<AdminProfile />} />
           <Route path="roles" element={<RoleManagement />} />
+          <Route path="promotions" element={<PromotionPage />} />
           <Route path="accounts" element={<UserManagement />} />
           <Route path="branchs" element={<BranchManagement />} />
+          <Route path="order" element={<AdminOrdersPage />} />
           {/* danh mục */}
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="suppliers" element={<SupplierManagement />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="warehouses" element={<WarehouseManagement />} />
-          <Route path="supplier-imports" element={<SupplierImportManagement />} />
-          <Route path="supplier-imports/:id" element={<SupplierImportDetailPage />} />
-          <Route path="branch-warehouses" element={<BranchWarehouseManagement />} />
+          <Route
+            path="supplier-imports"
+            element={<SupplierImportManagement />}
+          />
+          <Route
+            path="supplier-imports/:id"
+            element={<SupplierImportDetailPage />}
+          />
+          <Route
+            path="branch-warehouses"
+            element={<BranchWarehouseManagement />}
+          />
           {/* tồn kho */}
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="inventory-check" element={<InventoryCheckPage />} />
           <Route path="exports" element={<ExportToBranchPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+        {/* quản lý */}
+        <Route path="/manager" element={<ManagerLayout />}>
+          <Route path="dashboard" element={<ManagerDashboard />} />
+          <Route path="revenue" element={<BranchRevenuePage />} />
+          <Route path="inventory" element={<InventoryManagerPage />} />
+          <Route path="staff" element={<StaffManagement />} />
+          <Route path="profile" element={<ManagerProfile />} />
+          <Route
+            path="request-import"
+            element={<ExportToBranchManagerPage />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+        {/* kho tổng */}
+        <Route path="/warehouse" element={<WarehouseLayout />}>
+          <Route path="dashboard" element={<WarehouseDashboard />} />
+          <Route path="profile" element={<WarehouseProfile />} />
+          <Route
+            path="import"
+            element={<SupplierImportManagementWarehouse />}
+          />
+          <Route
+            path="import/:id"
+            element={<SupplierImportDetailPageWarehouse />}
+          />
+          <Route path="distribution" element={<ExportToBranchPage />} />
+          <Route path="stock" element={<InventoryPage />} />
+          <Route path="*" element={<NotFound />} />
+          {/* kho chi nhánh */}
+        </Route>
+        <Route path="/warehousebranch" element={<WarehouseBranchLayout />}>
+          <Route path="dashboard" element={<WarehouseBranchDashboard />} />
+          <Route path="stock" element={<InventoryManagerPage />} />
+          <Route path="profile" element={<WarehouseBranchProfile />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+        {/* nhân viên */}
+        <Route path="/staff" element={<StaffLayout />}>
+          <Route path="dashboard" element={<StaffDashboard />} />
+          <Route path="profile" element={<StaffProfile />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         {/* </Route> */}

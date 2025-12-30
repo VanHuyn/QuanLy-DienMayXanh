@@ -18,12 +18,17 @@ import { useCart } from "../../context/CartContext";
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const dropdownRef = useRef(null);
   const { cart } = useCart();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const totalItems = cart?.ChiTietGioHangs?.length || 0;
-
+  const handleSearch = () => {
+    if (searchText.trim() === "") return;
+    navigate(`/tim-kiem?query=${encodeURIComponent(searchText)}`);
+    setSearchText("")
+  };
   const handleLogout = async () => {
     await logout();
     navigate("/dang-nhap");
@@ -73,15 +78,18 @@ export default function Header() {
             {/* SEARCH BAR */}
             <div className="relative w-[420px] xl:w-[480px]">
               <div className="flex items-center bg-white rounded-full shadow-sm overflow-hidden border border-gray-200 focus-within:shadow-lg transition">
-                <Search size={20} className="text-gray-500 ml-4" />
                 <input
                   type="text"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   className="flex-1 px-3 py-2 text-gray-800 bg-transparent outline-none text-sm"
                   placeholder="Tìm kiếm sản phẩm, thương hiệu..."
                 />
-                <button className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm px-4 py-1.5 rounded-full">
-                  <Search size={16} />
-                  <span>Tìm</span>
+                <button
+                  onClick={handleSearch}
+                  className="flex cursor-pointer items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm px-4 py-1.5 rounded-full"
+                >
+                  Tìm
                 </button>
               </div>
             </div>

@@ -61,7 +61,6 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       const res = await cartService.clearCart();
-      toast.success(res.message || "Đã xoá toàn bộ giỏ hàng");
       fetchCart();
     } catch (err) {
       toast.error("Lỗi khi xoá giỏ hàng");

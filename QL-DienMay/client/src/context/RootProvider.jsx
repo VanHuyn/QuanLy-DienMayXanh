@@ -13,35 +13,43 @@ import { BranchProvider } from "../context/BranchContext";
 import { BranchWarehouseProvider } from "../context/BranchWarehouseContext";
 import { CartProvider } from "../context/CartContext";
 import { OrderProvider } from "../context/OrderContext";
+import { StaffProvider } from "../context/StaffContext";
+import { PromotionProvider } from "../context/PromotionContext";
 
 export default function RootProvider({ children }) {
   return (
     <AuthProvider>
       <RoleProvider>
         <UserProvider>
-          <CategoryProvider>
-            <SupplierProvider>
-              <ProductProvider>
-                <WarehouseProvider>
-                  <SupplierImportProvider>
-                    <SupplierImportDetailProvider>
-                      <ProductVariantProvider>
-                        <InventoryProvider>
-                          <BranchProvider>
-                            <BranchWarehouseProvider>
-                              <CartProvider>
-                                <OrderProvider>{children}</OrderProvider>
-                              </CartProvider>
-                            </BranchWarehouseProvider>
-                          </BranchProvider>
-                        </InventoryProvider>
-                      </ProductVariantProvider>
-                    </SupplierImportDetailProvider>
-                  </SupplierImportProvider>
-                </WarehouseProvider>
-              </ProductProvider>
-            </SupplierProvider>
-          </CategoryProvider>
+          <StaffProvider>
+            <CategoryProvider>
+              <SupplierProvider>
+                <ProductProvider>
+                  <WarehouseProvider>
+                    <SupplierImportProvider>
+                      <SupplierImportDetailProvider>
+                        <ProductVariantProvider>
+                          <InventoryProvider>
+                            <BranchProvider>
+                              <BranchWarehouseProvider>
+                                <CartProvider>
+                                  <OrderProvider>
+                                    <PromotionProvider>
+                                      {children}
+                                    </PromotionProvider>
+                                  </OrderProvider>
+                                </CartProvider>
+                              </BranchWarehouseProvider>
+                            </BranchProvider>
+                          </InventoryProvider>
+                        </ProductVariantProvider>
+                      </SupplierImportDetailProvider>
+                    </SupplierImportProvider>
+                  </WarehouseProvider>
+                </ProductProvider>
+              </SupplierProvider>
+            </CategoryProvider>
+          </StaffProvider>
         </UserProvider>
       </RoleProvider>
     </AuthProvider>

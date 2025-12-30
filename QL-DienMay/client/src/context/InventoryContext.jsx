@@ -28,7 +28,17 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-
+  const fetchMyBranchInventories = async () => {
+    setLoading(true);
+    try {
+      const data = await inventoryService.getMyBranchInventories();
+      setInventories(data);
+    } catch (e) {
+      toast.error("Không tải được tồn kho chi nhánh");
+    } finally {
+      setLoading(false);
+    }
+  };
   const khoTongInventories = inventories.filter(
     (i) => i.KhoTongId && Number(i.SoLuong) > 0
   );
@@ -102,7 +112,7 @@ export const InventoryProvider = ({ children }) => {
         loading,
         // 🔥 DÙNG CHO FORM XUẤT KHO
         khoTongInventories,
-
+        fetchMyBranchInventories,
         fetchInventories,
         updateSoLuongThucTe,
         submitInventoryCheck,

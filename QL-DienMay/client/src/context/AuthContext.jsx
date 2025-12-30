@@ -28,6 +28,7 @@ export function AuthProvider({ children }) {
 
     fetchProfile();
   }, []);
+  console.log(user)
   // đăng ký
   const register = async (formData) => {
     try {
