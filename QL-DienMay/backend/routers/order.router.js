@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 
 // Đặt hàng
 router.post("/", OrderController.placeOrder);
-
+router.get("/branch-orders", auth, OrderController.getBranchOrders);
 // Lấy danh sách đơn hàng của khách
 router.get("/customer/:khachHangId", OrderController.getCustomerOrders);
 router.get("/admin-order", auth,OrderController.getAllOrders); // lấy tất cả đơn hàng

@@ -6,10 +6,14 @@ const InventoryContext = createContext();
 export const useInventory = () => useContext(InventoryContext);
 
 export const InventoryProvider = ({ children }) => {
-  const [inventories, setInventories] = useState([]);
+  const [inventories, setInventories] = useState([]); // Dùng chung cho các form kiểm kê nếu cần
+  const [khoTongInventories, setKhoTongInventories] = useState([]); // riêng kho tổng
+  const [khoChiNhanhInventories, setKhoChiNhanhInventories] = useState([]); // riêng kho chi nhánh
   const [loading, setLoading] = useState(false);
 
-
+  // ===================
+  // FETCH KHO TỔNG
+  // ===================
   const fetchInventories = async () => {
     setLoading(true);
     try {
@@ -21,6 +25,7 @@ export const InventoryProvider = ({ children }) => {
       }));
 
       setInventories(mapped);
+      setKhoTongInventories(mapped.filter((i) => i.KhoTongId && Number(i.SoLuong) > 0));
     } catch (e) {
       toast.error("Không tải được tồn kho");
     } finally {
@@ -28,22 +33,24 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
+  // ===================
+  // FETCH KHO CHI NHÁNH
+  // ===================
   const fetchMyBranchInventories = async () => {
     setLoading(true);
     try {
       const data = await inventoryService.getMyBranchInventories();
-      setInventories(data);
+      setKhoChiNhanhInventories(data);
     } catch (e) {
       toast.error("Không tải được tồn kho chi nhánh");
     } finally {
       setLoading(false);
     }
   };
-  const khoTongInventories = inventories.filter(
-    (i) => i.KhoTongId && Number(i.SoLuong) > 0
-  );
 
+  // ===================
   // KIỂM KÊ
+  // ===================
   const updateSoLuongThucTe = (id, value) => {
     setInventories((prev) =>
       prev.map((i) =>
@@ -78,15 +85,10 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // =======================
-  // 🔥 XUẤT KHO CHO CHI NHÁNH
-  // =======================
-  const exportToBranch = async ({
-    bienTheId,
-    khoTongId,
-    khoChiNhanhId,
-    soLuong,
-  }) => {
+  // ===================
+  // XUẤT KHO CHO CHI NHÁNH
+  // ===================
+  const exportToBranch = async ({ bienTheId, khoTongId, khoChiNhanhId, soLuong }) => {
     try {
       await inventoryService.exportToBranch({
         bienTheId,
@@ -95,14 +97,15 @@ export const InventoryProvider = ({ children }) => {
         soLuong,
       });
       toast.success("Xuất kho thành công");
-      fetchInventories();
+      fetchInventories(); // cập nhật lại kho tổng
+      fetchMyBranchInventories(); // cập nhật lại kho chi nhánh
     } catch (e) {
       toast.error(e.response?.data?.message || "Xuất kho thất bại");
     }
   };
 
   useEffect(() => {
-    fetchInventories();
+    fetchInventories(); // mặc định fetch kho tổng khi load app
   }, []);
 
   return (
@@ -110,8 +113,8 @@ export const InventoryProvider = ({ children }) => {
       value={{
         inventories,
         loading,
-        // 🔥 DÙNG CHO FORM XUẤT KHO
         khoTongInventories,
+        khoChiNhanhInventories,
         fetchMyBranchInventories,
         fetchInventories,
         updateSoLuongThucTe,

@@ -67,7 +67,19 @@ class OrderController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+  static async getBranchOrders(req, res) {
+  try {
+    const branchId = req.user.chiNhanhId; // Giả sử user có ChiNhanhId
+    console.log(req.user)
+    if (!branchId)
+      return res.status(400).json({ success: false, message: "Người dùng không có chi nhánh" });
 
+    const orders = await OrderService.getOrdersByBranch(branchId);
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}
   // Cập nhật trạng thái đơn hàng
   static async updateOrderStatus(req, res) {
     try {

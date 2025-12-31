@@ -50,6 +50,11 @@ import SearchPage from "./components/customer/SearchPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import PromotionPage from "./pages/admin/PromotionPage";
 import PaymentSuccessPage from "./pages/customer/PaymentSuccessPage";
+import BranchManagerOrdersPage from "./pages/manager/BranchManagerOrdersPage";
+import AdminRevenuePage from "./pages/admin/AdminRevenuePage";
+import BranchStaffOrdersPage from "./pages/staff/BranchStaffOrdersPage";
+import InvoicePage from "./pages/staff/InvoicePage";
+import ChatSupportPage from "./pages/staff/ChatSupportPage";
 export default function App() {
   return (
     <div>
@@ -83,6 +88,7 @@ export default function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="suppliers" element={<SupplierManagement />} />
           <Route path="products" element={<ProductManagement />} />
+          <Route path="revenue" element={<AdminRevenuePage />} />
           <Route path="warehouses" element={<WarehouseManagement />} />
           <Route
             path="supplier-imports"
@@ -109,6 +115,7 @@ export default function App() {
           <Route path="inventory" element={<InventoryManagerPage />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="profile" element={<ManagerProfile />} />
+          <Route path="order" element={<BranchManagerOrdersPage />} />
           <Route
             path="request-import"
             element={<ExportToBranchManagerPage />}
@@ -142,6 +149,9 @@ export default function App() {
         <Route path="/staff" element={<StaffLayout />}>
           <Route path="dashboard" element={<StaffDashboard />} />
           <Route path="profile" element={<StaffProfile />} />
+          <Route path="orders" element={<BranchStaffOrdersPage />} />
+          <Route path="invoice" element={<InvoicePage />} />
+          <Route path="support" element={<ChatSupportPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         {/* </Route> */}

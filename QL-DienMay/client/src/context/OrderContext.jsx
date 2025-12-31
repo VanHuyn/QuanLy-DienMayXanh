@@ -29,6 +29,18 @@ export const OrderProvider = ({ children }) => {
       setLoading(false);
     }
   };
+   const fetchBranchOrders = async () => {
+    try {
+      setLoading(true);
+      const res = await orderService.getBranchOrders();
+      return res.data || [];
+    } catch (err) {
+      toast.error("Không thể tải đơn hàng chi nhánh");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
   const payWithMomo = async (orderData) => {
   try {
     const res = await orderService.payWithMomo(orderData);
@@ -107,7 +119,8 @@ export const OrderProvider = ({ children }) => {
         fetchAllOrders,
         fetchOrderDetail,
         updateOrderStatus,
-        payWithMomo
+        payWithMomo,
+        fetchBranchOrders
       }}
     >
       {children}

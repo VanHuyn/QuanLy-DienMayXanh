@@ -146,7 +146,7 @@ export default function ProductForm({
           type="file"
           multiple
           accept="image/*"
-          onChange={(e) => setImages([...e.target.files])}
+          onChange={(e) => setImages(Array.from(e.target.files))}
           className="hidden"
         />
 

@@ -34,9 +34,6 @@ export function AuthProvider({ children }) {
     try {
       const res = await authService.register(formData);
 
-      // Nếu bạn muốn tự động đăng nhập sau khi đăng ký:
-      // setUser(res.user);
-      // localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Đăng ký thành công!");
       return res.user;

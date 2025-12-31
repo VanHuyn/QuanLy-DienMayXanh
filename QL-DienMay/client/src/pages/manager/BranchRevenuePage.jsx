@@ -1,117 +1,156 @@
-import { useState } from "react";
+// BranchRevenuePage.jsx
+import { useEffect, useState } from "react";
+import { useRevenue } from "../../context/RevenueContext";
+import Meta from "../../components/Meta";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement,
-  LineElement,
   PointElement,
+  LineElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar, Line } from "react-chartjs-2";
-import { CalendarDays, Wallet } from "lucide-react";
-import Meta from "../../components/Meta";
+import { Line } from "react-chartjs-2";
+import useAuth from "../../hooks/useAuth";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  BarElement,
-  LineElement,
   PointElement,
+  LineElement,
   Title,
   Tooltip,
   Legend
 );
 
 export default function BranchRevenuePage() {
-  const [summary] = useState({
-    today: 45000000,
-    month: 980000000,
-    orders: 128,
-  });
+  const { user } = useAuth();
+  const { branchRevenue, fetchBranchRevenue, loading } = useRevenue();
+  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 
-  const barData = {
-    labels: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"],
-    datasets: [
-      {
-        label: "Doanh thu (triệu)",
-        data: [220, 250, 270, 240],
-        backgroundColor: "rgba(59, 130, 246, 0.85)",
-        borderRadius: 10,
-      },
-    ],
-  };
+  // Lấy dữ liệu khi mount
+  useEffect(() => {
+    if (user?.ChiNhanh?.Id) fetchBranchRevenue(user.ChiNhanh.Id);
+  }, []);
 
-  const lineData = {
-    labels: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
-    datasets: [
-      {
-        label: "Doanh thu ngày (triệu)",
-        data: [32, 40, 38, 45, 50, 60, 55],
-        borderColor: "#10B981",
-        backgroundColor: "rgba(16, 185, 129, 0.2)",
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
+  // Chuẩn hóa dữ liệu chart
+  useEffect(() => {
+    const revenueArray = Array.isArray(branchRevenue) ? branchRevenue : [];
+    if (revenueArray.length === 0) return;
+
+    const labels = revenueArray.map((d) => d.ngay);
+    const data = revenueArray.map((d) => Number(d.doanhThu) || 0);
+
+    setChartData({
+      labels,
+      datasets: [
+        {
+          label: "Doanh thu (VND)",
+          data,
+          borderColor: "#4ade80",
+          backgroundColor: "rgba(74, 222, 128, 0.2)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        },
+      ],
+    });
+  }, [branchRevenue]);
+
+  // Tính tổng doanh thu
+  const revenueArray = Array.isArray(branchRevenue) ? branchRevenue : [];
+  const totalRevenue = revenueArray.reduce(
+    (sum, d) => sum + Number(d.doanhThu || 0),
+    0
+  );
 
   return (
-    <div className="p-8 flex-1 bg-linear-to-br from-slate-100 to-slate-200 min-h-screen">
+    <div className="p-6">
       <Meta title="Doanh thu chi nhánh" />
+      <h1 className="text-2xl font-bold mb-4">Thống kê doanh thu chi nhánh</h1>
 
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-800 tracking-wide">
-          Doanh thu chi nhánh
-        </h1>
-        <p className="text-gray-600 mt-1 text-lg">
-          Theo dõi doanh thu, đơn hàng theo thời gian
-        </p>
+      {/* Tổng doanh thu */}
+      <div className="bg-white shadow-md rounded-xl p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-2">Tổng doanh thu chi nhánh</h2>
+        {loading ? (
+          <p className="text-gray-500">Đang tải...</p>
+        ) : (
+          <p className="text-2xl font-bold text-green-600">
+            {totalRevenue.toLocaleString()} VND
+          </p>
+        )}
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-10">
-        <div className="bg-linear-to-br from-emerald-500 to-emerald-400 text-white p-6 rounded-2xl shadow-xl">
-          <p className="text-sm opacity-80">Doanh thu hôm nay</p>
-          <h2 className="text-3xl font-bold mt-2">
-            {summary.today.toLocaleString()} ₫
-          </h2>
-        </div>
-
-        <div className="bg-linear-to-br from-blue-500 to-blue-400 text-white p-6 rounded-2xl shadow-xl">
-          <p className="text-sm opacity-80">Doanh thu tháng</p>
-          <h2 className="text-3xl font-bold mt-2">
-            {summary.month.toLocaleString()} ₫
-          </h2>
-        </div>
-
-        <div className="bg-linear-to-br from-purple-500 to-purple-400 text-white p-6 rounded-2xl shadow-xl">
-          <p className="text-sm opacity-80">Đơn hàng</p>
-          <h2 className="text-3xl font-bold mt-2">{summary.orders}</h2>
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            <CalendarDays size={20} /> Doanh thu theo ngày
-          </h2>
-          <Line data={lineData} />
-        </div>
-
-        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            <Wallet size={20} /> Doanh thu theo tuần
-          </h2>
-          <Bar
-            data={barData}
-            options={{ plugins: { legend: { display: false } } }}
+      {/* Biểu đồ doanh thu */}
+      <div
+        className="bg-white shadow-md rounded-xl p-6 mb-6"
+        style={{ height: 350 }}
+      >
+        <h2 className="text-lg font-semibold mb-2">Doanh thu theo ngày</h2>
+        {loading ? (
+          <p className="text-gray-500">Đang tải...</p>
+        ) : revenueArray.length === 0 ? (
+          <p className="text-gray-500">Chưa có dữ liệu</p>
+        ) : (
+          <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: { position: "top" },
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      (context.raw || 0).toLocaleString() + " VND",
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  ticks: {
+                    callback: (value) => value.toLocaleString(),
+                  },
+                },
+              },
+            }}
           />
-        </div>
+        )}
+      </div>
+
+      {/* Bảng chi tiết */}
+      <div className="bg-white shadow-md rounded-xl p-6">
+        <h2 className="text-lg font-semibold mb-2">Bảng doanh thu theo ngày</h2>
+        {loading ? (
+          <p className="text-gray-500">Đang tải...</p>
+        ) : revenueArray.length === 0 ? (
+          <p className="text-gray-500">Chưa có dữ liệu</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="p-3 text-left">Ngày</th>
+                  <th className="p-3 text-left">Chi nhánh</th>
+                  <th className="p-3 text-right">Doanh thu (VND)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {revenueArray.map((item, idx) => (
+                  <tr key={idx} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{item?.ngay}</td>
+                    <td className="p-3">{item?.tenChiNhanh}</td>
+                    <td className="p-3 text-right font-semibold">
+                      {Number(item?.doanhThu || 0).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ const orderService = {
     const res = await axios.post(`${API_URL}`, data, { withCredentials: true });
     return res.data;
   },
-   payWithMomo: async (orderData) => {
+  payWithMomo: async (orderData) => {
     const res = await axios.post(`${API_PAYMENT_URL}/create`, orderData, {
       withCredentials: true,
     });
@@ -39,6 +39,12 @@ const orderService = {
       data,
       { withCredentials: true }
     );
+    return res.data;
+  },
+  getBranchOrders: async () => {
+    const res = await axios.get(`${API_URL}/branch-orders`, {
+      withCredentials: true,
+    });
     return res.data;
   },
 };

@@ -2,37 +2,34 @@ import { useEffect, useState } from "react";
 import { useInventory } from "../../context/InventoryContext";
 import useAuth from "../../hooks/useAuth";
 
-
 export default function ExportToBranchManagerPage() {
-  const { khoTongInventories, exportToBranch } = useInventory();
-  const { user } = useAuth(); // 👈 user đã login
+  const { khoTongInventories, exportToBranch, fetchInventories } = useInventory();
+  const { user } = useAuth();
 
-  // 👉 LẤY KHO CHI NHÁNH TỪ USER
   const khoChiNhanhId = user?.ChiNhanh?.KhoChiNhanh?.Id || "";
 
-  const defaultForm = {
+  const [form, setForm] = useState({
     bienTheId: "",
     khoTongId: "",
     khoChiNhanhId: khoChiNhanhId,
     soLuong: 1,
-  };
+  });
 
-  const [form, setForm] = useState(defaultForm);
-
-  // cập nhật khoChiNhanhId nếu user load chậm
+  // Khi user thay đổi hoặc kho tổng thay đổi, cập nhật form mặc định
   useEffect(() => {
-    if (khoChiNhanhId) {
-      setForm((prev) => ({
-        ...prev,
-        khoChiNhanhId,
-      }));
-    }
-  }, [khoChiNhanhId]);
+    setForm((prev) => ({
+      ...prev,
+      khoChiNhanhId,
+      khoTongId: khoTongInventories[0]?.KhoTongId || "",
+    }));
+  }, [khoChiNhanhId, khoTongInventories]);
 
-  const selectedTonKho = khoTongInventories?.find(
+  // === Sản phẩm đang chọn ===
+  const selectedTonKho = khoTongInventories.find(
     (i) => i.BienTheSanPhamId == form.bienTheId
   );
 
+  // === Submit form ===
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,7 +39,15 @@ export default function ExportToBranchManagerPage() {
 
     try {
       await exportToBranch(form);
-      setForm(defaultForm);
+      // Reset form sau submit
+      setForm((prev) => ({
+        bienTheId: "",
+        khoTongId: khoTongInventories[0]?.KhoTongId || "",
+        khoChiNhanhId: khoChiNhanhId,
+        soLuong: 1,
+      }));
+      // Cập nhật lại kho tổng
+      fetchInventories();
     } catch (err) {
       console.error(err);
     }
@@ -56,41 +61,42 @@ export default function ExportToBranchManagerPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* ===== SẢN PHẨM KHO TỔNG ===== */}
-        <select
-          className="w-full border p-2 rounded"
-          value={form.bienTheId}
-          onChange={(e) => {
-            const bienTheId = e.target.value;
-            const tonKho = khoTongInventories.find(
-              (i) => i.BienTheSanPhamId == bienTheId
-            );
-
-            setForm((prev) => ({
-              ...prev,
-              bienTheId,
-              khoTongId: tonKho?.KhoTongId || "",
-            }));
-          }}
-        >
-          <option value="">-- Chọn sản phẩm trong kho tổng --</option>
-          {khoTongInventories.map((i) => (
-            <option key={i.Id} value={i.BienTheSanPhamId}>
-              {i.BienThe?.SanPham?.Ten} | Tồn: {i.SoLuong}
-            </option>
-          ))}
-        </select>
+        {!khoTongInventories.length ? (
+          <div>Đang tải sản phẩm...</div>
+        ) : (
+          <select
+            className="w-full border p-2 rounded"
+            value={form.bienTheId}
+            onChange={(e) => {
+              const bienTheId = e.target.value;
+              const tonKho = khoTongInventories.find(
+                (i) => i.BienTheSanPhamId == bienTheId
+              );
+              setForm((prev) => ({
+                ...prev,
+                bienTheId,
+                khoTongId: tonKho?.KhoTongId || "",
+              }));
+            }}
+          >
+            <option value="">-- Chọn sản phẩm trong kho tổng --</option>
+            {khoTongInventories.map((i) => (
+              <option key={i.Id} value={i.BienTheSanPhamId}>
+                {i.BienThe?.SanPham?.Ten} | Tồn: {i.SoLuong}
+              </option>
+            ))}
+          </select>
+        )}
 
         {selectedTonKho && (
           <div className="text-sm text-gray-600">
-            Tồn kho tổng:{" "}
-            <b className="text-blue-600">{selectedTonKho.SoLuong}</b>
+            Tồn kho tổng: <b className="text-blue-600">{selectedTonKho.SoLuong}</b>
           </div>
         )}
 
         {/* ===== KHO CHI NHÁNH (READ ONLY) ===== */}
         <div className="border p-2 rounded bg-gray-50 text-sm">
-          <b>Kho chi nhánh:</b>{" "}
-          {user?.ChiNhanh?.Ten || "Không xác định"}
+          <b>Kho chi nhánh:</b> {user?.ChiNhanh?.Ten || "Không xác định"}
         </div>
 
         {/* ===== SỐ LƯỢNG ===== */}
@@ -101,10 +107,7 @@ export default function ExportToBranchManagerPage() {
           className="w-full border p-2 rounded"
           value={form.soLuong}
           onChange={(e) =>
-            setForm((prev) => ({
-              ...prev,
-              soLuong: Number(e.target.value),
-            }))
+            setForm((prev) => ({ ...prev, soLuong: Number(e.target.value) }))
           }
         />
 

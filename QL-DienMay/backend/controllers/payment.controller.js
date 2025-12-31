@@ -9,7 +9,7 @@ const accessKey = "F8BBA842ECF85";
 const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
 
 const ipnUrl =
-  "https://d03ee34e775d.ngrok-free.app/api/v1/payment/momo/callback";
+  "https://c42f99fddc31.ngrok-free.app/api/v1/payment/momo/callback";
 
 const redirectUrl = "http://localhost:5173/thanh-toan-thanh-cong";
 

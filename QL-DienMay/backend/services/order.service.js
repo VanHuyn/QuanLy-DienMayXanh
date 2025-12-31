@@ -224,6 +224,45 @@ class OrderService {
       order: [["NgayDat", "DESC"]],
     });
   }
+  static async getOrdersByBranch(branchId) {
+    return DonHang.findAll({
+      where: { ChiNhanhId: branchId },
+      include: [
+        {
+          model: KhachHang,
+          as: "KhachHang",
+          include: [
+            {
+              model: NguoiDung,
+              as: "NguoiDung",
+              attributes: ["HoTen", "Email", "SoDienThoai"],
+            },
+          ],
+        },
+        {
+          model: ChiTietDonHang,
+          as: "ChiTietDonHangs",
+          include: [
+            {
+              model: BienTheSanPham,
+              as: "BienTheSanPham",
+              include: [
+                {
+                  model: SanPham,
+                  as: "SanPham",
+                  include: [{ model: AnhSanPham, as: "AnhSanPhams" }],
+                },
+              ],
+            },
+          ],
+        },
+        { model: PhieuThanhToan, as: "PhieuThanhToans" },
+        { model: PhieuBaoHanh, as: "PhieuBaoHanhs" },
+        { model: PhieuDoiTra, as: "PhieuDoiTras" }, // Sửa lại alias đúng
+      ],
+      order: [["NgayDat", "DESC"]],
+    });
+  }
 
   // Chi tiết 1 đơn hàng
   static async getOrderDetail(Id) {

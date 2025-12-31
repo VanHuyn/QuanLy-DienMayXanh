@@ -11,47 +11,43 @@ const { Op, fn, col, where } = require("sequelize");
 
 class ProductService {
   static async create(data, files) {
+    const transaction = await sequelize.transaction();
     try {
+      // Tách biến thể và dữ liệu sản phẩm
       const { BienTheSanPhams = [], ...sanPhamData } = data;
-      const transaction = await sequelize.transaction();
-      let product;
-      try {
-        product = await SanPham.create(sanPhamData, { transaction });
 
-        let bienTheList = BienTheSanPhams;
-        if (!bienTheList.length) {
-          bienTheList = [
-            {
-              Ten: sanPhamData.Ten,
-              Gia: sanPhamData.Gia,
-            },
-          ];
-        }
+      // 1. Tạo sản phẩm
+      const product = await SanPham.create(sanPhamData, { transaction });
 
-        const bienTheData = bienTheList.map((bt) => ({
-          SanPhamId: product.Id,
-          Ten: bt.Ten,
-          Gia: bt.Gia ?? sanPhamData.Gia,
-        }));
-
-        await BienTheSanPham.bulkCreate(bienTheData, { transaction });
-        await transaction.commit();
-      } catch (err) {
-        await transaction.rollback();
-        throw err;
+      // 2. Tạo biến thể
+      let bienTheList = BienTheSanPhams;
+      if (!bienTheList.length) {
+        bienTheList = [{ Ten: sanPhamData.Ten, Gia: sanPhamData.Gia }];
       }
+      const bienTheData = bienTheList.map((bt) => ({
+        SanPhamId: product.Id,
+        Ten: bt.Ten,
+        Gia: bt.Gia ?? sanPhamData.Gia,
+      }));
+      await BienTheSanPham.bulkCreate(bienTheData, { transaction });
 
+      // 3. Lưu ảnh trong transaction
       if (files?.length) {
-        const images = files.map((f) => ({
+        const images = files.map((f, index) => ({
           SanPhamId: product.Id,
-          Url: f.path, // cloudinary url
+          Url: f.path, // đường dẫn từ multer/cloudinary
+          LaChinh: index === 0,
         }));
-        await AnhSanPham.bulkCreate(images);
+        await AnhSanPham.bulkCreate(images, { transaction });
       }
+
+      // 4. Commit transaction sau khi tất cả xong
+      await transaction.commit();
 
       return product;
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
     }
   }
 

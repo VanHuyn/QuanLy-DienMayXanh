@@ -5,8 +5,9 @@ import { useCart } from "../../context/CartContext";
 import useAuth from "../../hooks/useAuth";
 import { FaStar } from "react-icons/fa";
 import Meta from "../../components/Meta";
+import { useRating } from "../../context/RatingContext";
 import toast from "react-hot-toast";
-
+import ProductReviews from "../../components/customer/ProductReviews";
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { addItem } = useCart();
@@ -19,19 +20,11 @@ export default function ProductDetailPage() {
     categoryProducts,
     loading,
   } = useProducts();
+  const { ratings, fetchRatings, createRating } = useRating();
   const [selectedImage, setSelectedImage] = useState(null);
-  const [reviews, setReviews] = useState([
-    {
-      name: "Nguyễn Văn A",
-      rating: 5,
-      content: "Sản phẩm rất tốt, dùng ổn định.",
-    },
-    {
-      name: "Trần Thị B",
-      rating: 4,
-      content: "Giao hàng nhanh, đóng gói cẩn thận.",
-    },
-  ]);
+  useEffect(() => {
+    if (id) fetchRatings(id);
+  }, [id]);
 
   const [newReview, setNewReview] = useState({
     name: "",
@@ -68,11 +61,26 @@ export default function ProductDetailPage() {
           100
       )
     : 0;
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (newReview.name && newReview.content && newReview.rating > 0) {
-      setReviews([newReview, ...reviews]);
-      setNewReview({ name: "", rating: 0, content: "" });
+    if (!user) return toast.error("Bạn cần đăng nhập để đánh giá sản phẩm");
+    if (!newReview.rating || !newReview.content)
+      return toast.error("Vui lòng chọn số sao và viết nhận xét");
+
+    try {
+      const res = await createRating({
+        SanPhamId: id,
+        SoSao: newReview.rating,
+        NoiDung: newReview.content,
+      });
+      if (res.success) {
+        toast.success("Đánh giá thành công");
+        setNewReview({ rating: 0, content: "" });
+      } else {
+        toast.error(res.message || "Không thể đánh giá sản phẩm");
+      }
+    } catch (err) {
+      toast.error(err.message || "Lỗi khi đánh giá sản phẩm");
     }
   };
   const handleAddToCart = async () => {
@@ -147,85 +155,65 @@ export default function ProductDetailPage() {
               <li>Giao hàng tận nhà nhanh chóng</li>
             </ul>
           </div>
+
           <div className="bg-white p-6 rounded-2xl shadow-md mt-6">
             <h3 className="font-semibold text-gray-800 text-lg mb-4">
               Viết đánh giá của bạn
             </h3>
             <form onSubmit={handleReviewSubmit} className="flex flex-col gap-4">
-              <input
-                type="text"
-                placeholder="Tên của bạn"
-                value={newReview?.name}
-                onChange={(e) =>
-                  setNewReview({ ...newReview, name: e.target.value })
-                }
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                required
-              />
+              {/* Star rating */}
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-gray-700">Đánh giá:</span>
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <FaStar
+                      key={i}
+                      size={28}
+                      className={`cursor-pointer transition-colors ${
+                        i < newReview.rating
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      } hover:text-yellow-400`}
+                      onClick={() =>
+                        setNewReview({ ...newReview, rating: i + 1 })
+                      }
+                    />
+                  ))}
+                </div>
+                {newReview.rating > 0 && (
+                  <span className="text-gray-600 text-sm ml-2">
+                    {newReview.rating} sao
+                  </span>
+                )}
+              </div>
+
+              {/* Textarea */}
               <textarea
                 placeholder="Nhập đánh giá..."
                 value={newReview.content}
                 onChange={(e) =>
                   setNewReview({ ...newReview, content: e.target.value })
                 }
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none"
-                rows={4}
+                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none text-gray-700 placeholder-gray-400"
+                rows={5}
                 required
               />
-              <div className="flex items-center gap-2">
-                <span>Đánh giá:</span>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <FaStar
-                    key={i}
-                    className={`cursor-pointer transition ${
-                      i < newReview.rating ? "text-yellow-400" : "text-gray-300"
-                    }`}
-                    onClick={() =>
-                      setNewReview({ ...newReview, rating: i + 1 })
-                    }
-                  />
-                ))}
-              </div>
+
+              {/* Submit button */}
               <button
                 type="submit"
-                className="bg-linear-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
               >
                 Gửi đánh giá
               </button>
             </form>
           </div>
+
           <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-4">
             <h2 className="font-semibold text-gray-800 text-lg">
               Đánh giá khách hàng
             </h2>
-
-            {reviews.length === 0 && (
-              <p className="text-gray-500">
-                Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm!
-              </p>
-            )}
-
-            <div className="space-y-4">
-              {reviews?.map((r, idx) => (
-                <div
-                  key={idx}
-                  className="border rounded-xl p-4 shadow-sm hover:shadow-md transition"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <FaStar
-                        key={i}
-                        className={
-                          i < r.rating ? "text-yellow-400" : "text-gray-300"
-                        }
-                      />
-                    ))}
-                    <span className="text-gray-500 text-sm">{r.name}</span>
-                  </div>
-                  <p className="text-gray-700">{r.content}</p>
-                </div>
-              ))}
-            </div>
+            <ProductReviews productId={id} />
           </div>
         </div>
 

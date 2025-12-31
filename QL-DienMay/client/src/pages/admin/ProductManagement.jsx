@@ -51,31 +51,33 @@ export default function ProductManagement() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e, images) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const formData = new FormData();
-
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && typeof value !== "object") {
-        formData.append(key, value);
-      }
-    });
-
-    if (images.length > 0) {
-      images.forEach((img) => formData.append("images", img));
+  const formData = new FormData();
+  Object.entries(form).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && typeof value !== "object") {
+      formData.append(key, value);
     }
+  });
 
-    if (isEdit) {
-      await updateProduct(form.Id, formData);
-    } else {
-      await createProduct(formData);
-    }
+  // Lấy trực tiếp file từ input
+  const fileInput = document.getElementById("product-images");
+  if (fileInput?.files?.length > 0) {
+    Array.from(fileInput.files).forEach((file) => formData.append("images", file));
+  }
 
-    setForm(emptyForm);
-    setIsEdit(false);
-    setShowForm(false);
-  };
+  if (isEdit) {
+    await updateProduct(form.Id, formData);
+  } else {
+    await createProduct(formData);
+  }
+
+  setForm(emptyForm);
+  setIsEdit(false);
+  setShowForm(false);
+};
+
 
   return (
     <div className="p-6 bg-linear-to-br from-blue-50 to-blue-100 min-h-screen">

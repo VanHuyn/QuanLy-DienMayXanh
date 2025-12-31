@@ -15,6 +15,11 @@ import { CartProvider } from "../context/CartContext";
 import { OrderProvider } from "../context/OrderContext";
 import { StaffProvider } from "../context/StaffContext";
 import { PromotionProvider } from "../context/PromotionContext";
+import { RatingProvider } from "../context/RatingContext";
+import { RevenueProvider } from "../context/RevenueContext";
+import { InvoiceProvider } from "../context/InvoiceContext";
+import { QuayProvider } from "../context/QuayContext";
+import { ChatProvider } from "../context/ChatContext";
 
 export default function RootProvider({ children }) {
   return (
@@ -35,7 +40,17 @@ export default function RootProvider({ children }) {
                                 <CartProvider>
                                   <OrderProvider>
                                     <PromotionProvider>
-                                      {children}
+                                      <RatingProvider>
+                                        <RevenueProvider>
+                                          <InvoiceProvider>
+                                            <QuayProvider>
+                                              <ChatProvider>
+                                                {children}
+                                              </ChatProvider>
+                                            </QuayProvider>
+                                          </InvoiceProvider>
+                                        </RevenueProvider>
+                                      </RatingProvider>
                                     </PromotionProvider>
                                   </OrderProvider>
                                 </CartProvider>

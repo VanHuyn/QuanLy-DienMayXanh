@@ -1,6 +1,11 @@
 // AnhSanPham.js
 // Model Sequelize cho bảng AnhSanPham
 // Ảnh sản phẩm
+npx sequelize-cli migration:generate --name create-cuoc-tro-chuyen
+npx sequelize-cli migration:generate --name create-tin-nhan
+npx sequelize-cli db:migrate
+
+
 
 module.exports = (sequelize, DataTypes) => {
   const AnhSanPham = sequelize.define('AnhSanPham', {
