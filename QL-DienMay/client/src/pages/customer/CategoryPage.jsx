@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import { useProducts } from "../../context/ProductContext";
 import { useBranches } from "../../context/BranchContext";
 export default function CategoryPage() {
   const [filterOpen, setFilterOpen] = useState(false);
-    const { slug } = useParams(); // slug từ URL
+  const { slug } = useParams(); // slug từ URL
   const { selectedBranch } = useBranches();
-  const { categoryProducts, fetchProductsByCategorySlug, loading } = useProducts();
+  const { categoryProducts, fetchProductsByCategorySlug, loading } =
+    useProducts();
   useEffect(() => {
     if (slug) {
-      fetchProductsByCategorySlug(slug,selectedBranch?.Id);
+      fetchProductsByCategorySlug(slug, selectedBranch?.Id);
     }
   }, [slug]);
-  console.log(categoryProducts)
+  console.log(categoryProducts);
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumb */}
@@ -25,7 +26,7 @@ export default function CategoryPage() {
           Trang chủ
         </Link>
         <span>›</span>
-        <span className="font-medium text-gray-800">Máy lọc nước</span>
+        <span className="font-medium text-gray-800">{slug}</span>
       </div>
 
       {/* Banner lớn */}
@@ -38,14 +39,20 @@ export default function CategoryPage() {
         {/* Top Hot Products Swiper */}
         <div className="max-w-7xl mx-auto px-4 py-6 relative">
           <Swiper
-            modules={[Navigation]}
+            modules={[Navigation, Autoplay]}
             slidesPerView={1} // mobile mặc định 1 slide
             spaceBetween={15}
+            loop={true}
             breakpoints={{
               640: { slidesPerView: 2 },
               768: { slidesPerView: 3 },
               1024: { slidesPerView: 4 },
               1280: { slidesPerView: 5 },
+            }}
+            autoplay={{
+              delay: 2000, // 2.5 giây
+              disableOnInteraction: false, // vuốt tay vẫn chạy tiếp
+              pauseOnMouseEnter: true, // hover thì pause
             }}
             navigation={{
               nextEl: ".swiper-button-next",
@@ -97,7 +104,6 @@ export default function CategoryPage() {
               />
             </SwiperSlide>
           ))}
-          
         </Swiper>
       </div>
       <div className="max-w-7xl mx-auto px-4 py-4">

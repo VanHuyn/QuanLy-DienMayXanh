@@ -3,6 +3,6 @@ const router = express.Router();
 const controller = require("../controllers/inventoryCheck.controller");
 const auth = require("../middleware/auth");
 
-router.post("/", auth, controller.adjust);
+router.post("/", auth, controller.adjustInventory);
 
 module.exports = router;

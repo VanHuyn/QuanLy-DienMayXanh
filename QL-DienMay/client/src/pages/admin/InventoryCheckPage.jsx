@@ -6,9 +6,12 @@ export default function InventoryCheckPage() {
     useInventory();
 
   const [ghiChu, setGhiChu] = useState("");
-  const khoTongId = inventories[0]?.KhoTongId;
+  const khoTongItem = inventories.find((i) => i.KhoTongId !== null);
+  const KhoTongId = khoTongItem?.KhoTongId;
+
+  console.log(" KhoTongId ", KhoTongId);
   if (loading) return <div>Đang tải tồn kho...</div>;
-  console.log(inventories)
+  console.log(inventories);
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Kiểm kê & Điều chỉnh tồn kho</h1>
@@ -70,8 +73,8 @@ export default function InventoryCheckPage() {
 
       <div className="text-right mt-4">
         <button
-          onClick={() => submitInventoryCheck(khoTongId, ghiChu)}
-          disabled={!khoTongId}
+          onClick={() => submitInventoryCheck(KhoTongId, ghiChu)}
+          disabled={!KhoTongId}
           className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
         >
           Xác nhận kiểm kê

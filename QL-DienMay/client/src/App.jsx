@@ -104,7 +104,6 @@ export default function App() {
           />
           {/* tồn kho */}
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="inventory-check" element={<InventoryCheckPage />} />
           <Route path="exports" element={<ExportToBranchPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -142,6 +141,7 @@ export default function App() {
         <Route path="/warehousebranch" element={<WarehouseBranchLayout />}>
           <Route path="dashboard" element={<WarehouseBranchDashboard />} />
           <Route path="stock" element={<InventoryManagerPage />} />
+          <Route path="inventory-check" element={<InventoryCheckPage />} />
           <Route path="profile" element={<WarehouseBranchProfile />} />
           <Route path="*" element={<NotFound />} />
         </Route>

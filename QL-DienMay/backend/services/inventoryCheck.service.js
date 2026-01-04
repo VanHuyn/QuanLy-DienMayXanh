@@ -2,12 +2,26 @@ const {
   TonKho,
   PhieuNhapXuatKho,
   ChiTietPhieuNhapXuatKho,
+  NhanVien, // 🔥 THÊM
   sequelize,
 } = require("../models");
 
 const InventoryCheckService = {
   adjust: async (data, user) => {
+    console.log(user)
     const { KhoTongId, GhiChu, ChiTiet } = data;
+    if (!user || !user.userId) {
+      throw new Error("Chưa đăng nhập");
+    }
+
+    // 🔥 LẤY NHÂN VIÊN TỪ NGUOIDUNGID
+    const nhanVien = await NhanVien.findOne({
+      where: { NguoiDungId: user.userId },
+    });
+    console.log(nhanVien)
+    if (!nhanVien) {
+      throw new Error("Tài khoản này không phải nhân viên");
+    }
 
     if (!ChiTiet || ChiTiet.length === 0) {
       throw new Error("Không có dữ liệu kiểm kê");
@@ -20,7 +34,7 @@ const InventoryCheckService = {
         {
           Loai: "DieuChinh",
           NoiGui: `KhoTong:${KhoTongId}`,
-          NhanVienId: user.userId,
+          NhanVienId: nhanVien.Id, // ✅ ĐÚNG FK
           GhiChu,
         },
         { transaction: t }
@@ -56,10 +70,8 @@ const InventoryCheckService = {
           },
           { transaction: t }
         );
-        await tonKho.update(
-          { SoLuong: soLuongThucTe },
-          { transaction: t }
-        );
+
+        await tonKho.update({ SoLuong: soLuongThucTe }, { transaction: t });
       }
 
       if (!coChenhLech) {

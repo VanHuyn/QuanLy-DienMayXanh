@@ -252,12 +252,9 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="bg-linear-to-r from-indigo-500 to-indigo-600 cursor-pointer hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md">
-              Mua ngay
-            </button>
             <button
               onClick={handleAddToCart}
-              className="border border-gray-300 hover:border-gray-500 cursor-pointer text-gray-800 font-medium py-3 rounded-xl transition-all shadow-sm"
+              className="bg-linear-to-r from-indigo-500 to-indigo-600 cursor-pointer hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all shadow-sm"
             >
               Thêm vào giỏ
             </button>

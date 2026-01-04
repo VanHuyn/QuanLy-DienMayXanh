@@ -1,4 +1,3 @@
-
 const slugify = require("slugify");
 
 module.exports = (sequelize, DataTypes) => {
@@ -42,16 +41,12 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
-  const models = sequelize.models;
-  try {
-    if (models.SanPham)
-      DanhMuc.hasMany(models.SanPham, {
-        foreignKey: "DanhMucId",
-        as: "SanPhams",
-      });
-  } catch (e) {
-    // Có thể chưa đăng ký model khác; gọi lại associate từ code khởi tạo nếu cần
-  }
+  DanhMuc.associate = (models) => {
+    DanhMuc.hasMany(models.SanPham, {
+      foreignKey: "DanhMucId",
+      as: "SanPhams",
+    });
+  };
 
   return DanhMuc;
 };

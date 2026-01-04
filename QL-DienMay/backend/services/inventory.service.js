@@ -11,6 +11,9 @@ const InventoryService = {
               association: "SanPham",
               include: [
                 {
+                  association: "DanhMuc", // ✅ THÊM DÒNG NÀY
+                },
+                {
                   association: "AnhSanPhams",
                   required: false,
                   separate: true,
@@ -29,34 +32,33 @@ const InventoryService = {
       order: [["updatedAt", "DESC"]],
     });
   },
-getByKhoChiNhanh: async (khoChiNhanhId) => {
-  return await TonKho.findAll({
-    where: {
-      KhoChiNhanhId: khoChiNhanhId,
-    },
-    include: [
-      {
-        association: "BienThe",
-        include: [
-          {
-            association: "SanPham",
-            include: [
-              {
-                association: "AnhSanPhams",
-                required: false,
-              },
-            ],
-          },
-        ],
+  getByKhoChiNhanh: async (khoChiNhanhId) => {
+    return await TonKho.findAll({
+      where: {
+        KhoChiNhanhId: khoChiNhanhId,
       },
-      {
-        association: "KhoChiNhanh",
-      },
-    ],
-    order: [["updatedAt", "DESC"]],
-  });
-},
-
+      include: [
+        {
+          association: "BienThe",
+          include: [
+            {
+              association: "SanPham",
+              include: [
+                {
+                  association: "AnhSanPhams",
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          association: "KhoChiNhanh",
+        },
+      ],
+      order: [["updatedAt", "DESC"]],
+    });
+  },
 
   exportFromKhoTongToChiNhanh: async ({
     BienTheSanPhamId,

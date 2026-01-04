@@ -139,39 +139,19 @@ export const ChatProvider = ({ children }) => {
     joinRoom(cuoc.Id);
   };
 
-  // Gửi tin nhắn
-  const sendTinNhan = async (NoiDung) => {
-    if (!NoiDung.trim()) return;
-    if (!user) return;
+const sendTinNhan = async (NoiDung) => {
+  if (!NoiDung.trim() || !user) return;
 
-    // Nếu khách hàng chưa có cuộc trò chuyện -> tạo mới
-    if (!selectedCuoc) {
-      const cuocMoi = await taoHoacLayCuocTroChuyen({
-        KhachHangId: user.Id,
-        NhanVienId: null, // để backend tự assign nhân viên
-      });
-      if (!cuocMoi) return;
-    }
+  if (!selectedCuocRef.current) return;
 
-    joinRoom(selectedCuocRef.current.Id);
+  joinRoom(selectedCuocRef.current.Id);
 
-    socket.current.emit("sendMessage", {
-      CuocTroChuyenId: selectedCuocRef.current.Id,
-      NoiDung,
-      NguoiGui: user.VaiTro.Ten,
-    });
-
-    // Update local ngay
-    setTinNhans((prev) => [
-      ...prev,
-      {
-        CuocTroChuyenId: selectedCuocRef.current.Id,
-        NoiDung,
-        NguoiGui: user.VaiTro.Ten,
-        createdAt: new Date(),
-      },
-    ]);
-  };
+  socket.current.emit("sendMessage", {
+    CuocTroChuyenId: selectedCuocRef.current.Id,
+    NoiDung,
+    NguoiGui: user.VaiTro.Ten,
+  });
+};
 
   // Tìm khách hàng theo SDT
   const timKhachHang = async (soDienThoai) => {

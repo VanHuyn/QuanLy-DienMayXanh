@@ -60,6 +60,7 @@ export const InventoryProvider = ({ children }) => {
   };
 
   const submitInventoryCheck = async (KhoTongId, GhiChu = "") => {
+    console.log(KhoTongId, GhiChu)
     const ChiTiet = inventories
       .filter((i) => Number(i.SoLuongThucTe) !== Number(i.SoLuong))
       .map((i) => ({
